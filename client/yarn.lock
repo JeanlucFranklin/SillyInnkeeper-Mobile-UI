@@ -1162,6 +1162,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"effector-react@npm:^23.3.0":
+  version: 23.3.0
+  resolution: "effector-react@npm:23.3.0"
+  dependencies:
+    use-sync-external-store: "npm:^1.0.0"
+  peerDependencies:
+    effector: ^23.0.0
+    react: ">=16.8.0 <20.0.0"
+  checksum: 10c0/335751c9d89391131b62a225e7c736dc64e34fe919d4c695096121e9eff7c6fa768c0ce2876d4090b6bf82d499a3cef29b80712c189418d2fc47a26eef1798a8
+  languageName: node
+  linkType: hard
+
+"effector@npm:^23.4.4":
+  version: 23.4.4
+  resolution: "effector@npm:23.4.4"
+  checksum: 10c0/436baad3b6e6f907dbe6c5a2fe58657048104acb228688d7a0841c9d14d8763c8df94a807ff9699f798f91e8201695d82deddfc46a53e775b15b57bce7815517
+  languageName: node
+  linkType: hard
+
 "electron-to-chromium@npm:^1.5.41":
   version: 1.5.66
   resolution: "electron-to-chromium@npm:1.5.66"
@@ -1965,6 +1984,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-virtuoso@npm:^4.17.0":
+  version: 4.17.0
+  resolution: "react-virtuoso@npm:4.17.0"
+  peerDependencies:
+    react: ">=16 || >=17 || >= 18 || >= 19"
+    react-dom: ">=16 || >=17 || >= 18 || >=19"
+  checksum: 10c0/0f26395742d1e1f5db995ef18ec0726522e6f21536811222b409c08fcd7d142fb6bd4a498c78494da7630aa803492bbcf6b3cf5bf5ada0711ea48430fa0850e2
+  languageName: node
+  linkType: hard
+
 "react@npm:^19.1.1":
   version: 19.1.1
   resolution: "react@npm:19.1.1"
@@ -2384,6 +2413,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"use-sync-external-store@npm:^1.0.0":
+  version: 1.6.0
+  resolution: "use-sync-external-store@npm:1.6.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/35e1179f872a53227bdf8a827f7911da4c37c0f4091c29b76b1e32473d1670ebe7bcd880b808b7549ba9a5605c233350f800ffab963ee4a4ee346ee983b6019b
+  languageName: node
+  linkType: hard
+
 "util-deprecate@npm:^1.0.2":
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2"
@@ -2400,11 +2438,14 @@ __metadata:
     "@types/react": "npm:^19.1.13"
     "@types/react-dom": "npm:^19.1.9"
     "@vitejs/plugin-react": "npm:^5.0.2"
+    effector: "npm:^23.4.4"
+    effector-react: "npm:^23.3.0"
     postcss: "npm:^8.5.6"
     postcss-preset-mantine: "npm:1.18.0"
     postcss-simple-vars: "npm:^7.0.1"
     react: "npm:^19.1.1"
     react-dom: "npm:^19.1.1"
+    react-virtuoso: "npm:^4.17.0"
     typescript: "npm:^5.9.2"
     vite: "npm:^7.1.5"
   languageName: unknown
