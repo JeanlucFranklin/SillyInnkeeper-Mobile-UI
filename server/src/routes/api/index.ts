@@ -1,3 +1,4 @@
+import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from 'fastify'
 import settings from './settings'
 
@@ -6,5 +7,7 @@ const api: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   await fastify.register(settings, { prefix: '/api' })
 }
 
-export default api
+// Используем fastify-plugin чтобы предотвратить автоматический префикс от AutoLoad
+// на основе имени папки
+export default fp(api)
 
