@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { createDatabaseService, DatabaseService } from "./database";
 import { CardParser } from "./card-parser";
 import { generateThumbnail, deleteThumbnail } from "./thumbnail";
+import { createTagService } from "./tags";
 
 const CONCURRENT_LIMIT = 5;
 
@@ -148,6 +149,12 @@ export class ScanService {
           : null;
       const creator = extractedData.creator || null;
       const specVersion = extractedData.spec_version;
+
+      // Обеспечиваем существование тегов в таблице tags
+      if (extractedData.tags && extractedData.tags.length > 0) {
+        const tagService = createTagService(this.dbService.getDatabase());
+        tagService.ensureTagsExist(extractedData.tags);
+      }
 
       // Сохраняем оригинальные данные для экспорта
       const dataJson = JSON.stringify(extractedData.original_data);

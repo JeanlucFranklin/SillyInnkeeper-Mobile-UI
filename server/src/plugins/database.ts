@@ -79,5 +79,16 @@ function initializeSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_cards_name ON cards(name);
     CREATE INDEX IF NOT EXISTS idx_cards_created_at ON cards(created_at);
     CREATE INDEX IF NOT EXISTS idx_card_files_card_id ON card_files(card_id);
+    
+    -- Таблица тегов
+    CREATE TABLE IF NOT EXISTS tags (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      rawName TEXT NOT NULL UNIQUE
+    );
+    
+    -- Индексы для тегов
+    CREATE INDEX IF NOT EXISTS idx_tags_rawName ON tags(rawName);
+    CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);
   `);
 }

@@ -64,6 +64,14 @@ export class DatabaseService {
   prepare(sql: string): Database.Statement {
     return this.db.prepare(sql);
   }
+
+  /**
+   * Получает экземпляр Database для передачи в другие сервисы
+   * @returns Экземпляр Database
+   */
+  getDatabase(): Database.Database {
+    return this.db;
+  }
 }
 
 /**
