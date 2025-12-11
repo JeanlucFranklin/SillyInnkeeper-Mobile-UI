@@ -5,18 +5,10 @@ import { readdir as readdirAsync, writeFile, ensureDir } from "fs-extra";
 import pLimit from "p-limit";
 import { randomUUID } from "node:crypto";
 import { createDatabaseService, DatabaseService } from "./database";
-import { parsePngMetadata } from "./png-parser";
+import { CardParser } from "./card-parser";
 import { generateThumbnail, deleteThumbnail } from "./thumbnail";
 
 const CONCURRENT_LIMIT = 5;
-
-interface CardData {
-  name?: string;
-  description?: string;
-  tags?: string[];
-  creator?: string;
-  [key: string]: unknown;
-}
 
 /**
  * Сервис для сканирования папки с карточками и синхронизации с базой данных
@@ -24,8 +16,11 @@ interface CardData {
 export class ScanService {
   private limit = pLimit(CONCURRENT_LIMIT);
   private scannedFiles = new Set<string>();
+  private cardParser: CardParser;
 
-  constructor(private dbService: DatabaseService) {}
+  constructor(private dbService: DatabaseService) {
+    this.cardParser = new CardParser();
+  }
 
   /**
    * Рекурсивно сканирует папку и обрабатывает все PNG файлы
@@ -118,14 +113,12 @@ export class ScanService {
         return;
       }
 
-      // Парсим метаданные
-      const parsedData = parsePngMetadata(filePath);
-      if (!parsedData) {
-        console.error(`Не удалось распарсить метаданные из ${filePath}`);
+      // Парсим карточку через CardParser
+      const extractedData = this.cardParser.parse(filePath);
+      if (!extractedData) {
+        console.error(`Не удалось распарсить карточку из ${filePath}`);
         return;
       }
-
-      const cardData = parsedData.data as CardData;
 
       // Определяем cardId: используем существующий или создаем новый
       const cardId = existingFile ? existingFile.card_id : randomUUID();
@@ -146,13 +139,18 @@ export class ScanService {
         }
       }
 
-      // Извлекаем поля из данных карточки
-      const name = cardData.name || null;
-      const description = cardData.description || null;
-      const tags = cardData.tags ? JSON.stringify(cardData.tags) : null;
-      const creator = cardData.creator || null;
-      const specVersion = parsedData.spec_version;
-      const dataJson = JSON.stringify(cardData);
+      // Извлекаем поля из единообразного формата данных
+      const name = extractedData.name || null;
+      const description = extractedData.description || null;
+      const tags =
+        extractedData.tags.length > 0
+          ? JSON.stringify(extractedData.tags)
+          : null;
+      const creator = extractedData.creator || null;
+      const specVersion = extractedData.spec_version;
+
+      // Сохраняем оригинальные данные для экспорта
+      const dataJson = JSON.stringify(extractedData.original_data);
       const createdAt = Date.now();
 
       // Записываем в БД в транзакции
@@ -230,14 +228,17 @@ export class ScanService {
             id: cardId,
             name,
             description,
-            tags: cardData.tags || null,
+            tags: extractedData.tags.length > 0 ? extractedData.tags : null,
             creator,
             spec_version: specVersion,
             avatar_path: avatarPath,
             created_at: createdAt,
-            data_json: cardData,
+            data_json: extractedData.original_data,
           },
-          raw: parsedData,
+          raw: {
+            data: extractedData.original_data,
+            spec_version: specVersion,
+          },
         };
         await writeFile(jsonPath, JSON.stringify(jsonData, null, 2), "utf-8");
       }

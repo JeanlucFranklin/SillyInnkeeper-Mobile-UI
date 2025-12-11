@@ -1,13 +1,10 @@
 import { readFileSync } from "node:fs";
-
-export interface ParsedCardData {
-  data: unknown;
-  spec_version: "2.0" | "3.0";
-}
+import { ParsedCardData } from "./types";
 
 /**
  * Парсит метаданные карточки из PNG файла
  * Читает текстовые чанки tEXt без полного декодирования изображения
+ * Поддерживает приоритет версий: сначала ищет ccv3 (V3), затем chara (V2)
  * @param filePath Путь к PNG файлу
  * @returns Парсированные данные карточки или null в случае ошибки
  */
@@ -25,7 +22,8 @@ export function parsePngMetadata(filePath: string): ParsedCardData | null {
       return null;
     }
 
-    // Парсим чанки, начиная с позиции 8 (после сигнатуры)
+    // Собираем все tEXt чанки для обработки
+    const textChunks: Array<{ keyword: string; text: string }> = [];
     let position = 8;
 
     while (position < buffer.length - 12) {
@@ -56,35 +54,19 @@ export function parsePngMetadata(filePath: string): ParsedCardData | null {
           const keyword = chunkData.slice(0, nullIndex).toString("ascii");
           const text = chunkData.slice(nullIndex + 1).toString("latin1");
 
-          // Ищем чанк с ключевым словом "chara"
-          if (keyword === "chara") {
-            try {
-              // Декодируем Base64 содержимое
-              const decodedData = Buffer.from(text, "base64").toString("utf-8");
-              const cardData = JSON.parse(decodedData);
-
-              // Определяем версию спецификации
-              const specVersion: "2.0" | "3.0" =
-                cardData.spec === "chara_card_v3" ? "3.0" : "2.0";
-
-              return {
-                data: cardData,
-                spec_version: specVersion,
-              };
-            } catch (error) {
-              console.error(
-                `Ошибка при декодировании данных карточки из ${filePath}:`,
-                error
-              );
-              return null;
-            }
+          // Сохраняем чанки ccv3 и chara для последующей обработки
+          if (
+            keyword.toLowerCase() === "ccv3" ||
+            keyword.toLowerCase() === "chara"
+          ) {
+            textChunks.push({ keyword: keyword.toLowerCase(), text });
           }
         }
 
         // Пропускаем CRC (4 байта) и переходим к следующему чанку
         position += chunkLength + 4;
       } else if (chunkType === "IEND") {
-        // Конец файла - чанк chara не найден
+        // Конец файла
         break;
       } else {
         // Пропускаем другие чанки (данные + CRC)
@@ -97,7 +79,102 @@ export function parsePngMetadata(filePath: string): ParsedCardData | null {
       }
     }
 
-    // Чанк chara не найден
+    // Приоритет версий: сначала ищем ccv3 (V3), затем chara (V2)
+    // Ищем ccv3 (V3) - наивысший приоритет
+    const ccv3Chunk = textChunks.find((chunk) => chunk.keyword === "ccv3");
+    if (ccv3Chunk) {
+      try {
+        const decodedData = Buffer.from(ccv3Chunk.text, "base64").toString(
+          "utf-8"
+        );
+        const cardData = JSON.parse(decodedData);
+
+        // Определяем версию спецификации
+        let specVersion: "1.0" | "2.0" | "3.0" | "UNKNOWN" = "UNKNOWN";
+        if (cardData.spec === "chara_card_v3") {
+          specVersion = "3.0";
+        } else if (cardData.spec === "chara_card_v2") {
+          specVersion = "2.0";
+        } else if (!cardData.spec) {
+          // Если spec отсутствует, пытаемся определить V1 по обязательным полям
+          const v1RequiredFields = [
+            "name",
+            "description",
+            "personality",
+            "scenario",
+            "first_mes",
+            "mes_example",
+          ];
+          const hasAllV1Fields = v1RequiredFields.every((field) =>
+            cardData.hasOwnProperty(field)
+          );
+          if (hasAllV1Fields) {
+            specVersion = "1.0";
+          }
+        }
+
+        return {
+          data: cardData,
+          spec_version: specVersion,
+          chunk_type: "ccv3",
+        };
+      } catch (error) {
+        console.error(
+          `Ошибка при декодировании данных карточки ccv3 из ${filePath}:`,
+          error
+        );
+        // Продолжаем поиск chara чанка
+      }
+    }
+
+    // Fallback: ищем chara (V2)
+    const charaChunk = textChunks.find((chunk) => chunk.keyword === "chara");
+    if (charaChunk) {
+      try {
+        const decodedData = Buffer.from(charaChunk.text, "base64").toString(
+          "utf-8"
+        );
+        const cardData = JSON.parse(decodedData);
+
+        // Определяем версию спецификации
+        let specVersion: "1.0" | "2.0" | "3.0" | "UNKNOWN" = "UNKNOWN";
+        if (cardData.spec === "chara_card_v2") {
+          specVersion = "2.0";
+        } else if (cardData.spec === "chara_card_v3") {
+          specVersion = "3.0";
+        } else if (!cardData.spec) {
+          // Если spec отсутствует, пытаемся определить V1 по обязательным полям
+          const v1RequiredFields = [
+            "name",
+            "description",
+            "personality",
+            "scenario",
+            "first_mes",
+            "mes_example",
+          ];
+          const hasAllV1Fields = v1RequiredFields.every((field) =>
+            cardData.hasOwnProperty(field)
+          );
+          if (hasAllV1Fields) {
+            specVersion = "1.0";
+          }
+        }
+
+        return {
+          data: cardData,
+          spec_version: specVersion,
+          chunk_type: "chara",
+        };
+      } catch (error) {
+        console.error(
+          `Ошибка при декодировании данных карточки chara из ${filePath}:`,
+          error
+        );
+        return null;
+      }
+    }
+
+    // Чанки ccv3 и chara не найдены
     return null;
   } catch (error) {
     console.error(`Ошибка при парсинге PNG файла ${filePath}:`, error);
