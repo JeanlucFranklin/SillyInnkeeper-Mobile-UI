@@ -6,6 +6,7 @@ import {
   Stack,
   Group,
   Badge,
+  Tooltip,
   Modal,
   ActionIcon,
   Box,
@@ -22,40 +23,58 @@ export function Card({ card }: CardProps) {
   const [isCensored] = useUnit([$isCensored]);
   const [opened, setOpened] = useState(false);
 
+  const tags = card.tags ?? [];
+  const visibleTags = tags.slice(0, 2);
+  const hiddenTagsCount = Math.max(0, tags.length - visibleTags.length);
+  const hiddenTags = hiddenTagsCount > 0 ? tags.slice(visibleTags.length) : [];
+
+  const createdAtLabel = (() => {
+    const t = Number((card as any).created_at);
+    if (!Number.isFinite(t) || t <= 0) return null;
+    return new Date(t).toLocaleDateString("ru-RU");
+  })();
+
+  const greetingsCount = Number((card as any).alternate_greetings_count) || 0;
+  const hasBook = Boolean((card as any).has_character_book);
+  const tokensEstimate = 1500;
+
   return (
     <>
       <MantineCard
-        shadow="sm"
         padding="md"
-        radius="md"
-        withBorder
         style={{
-          width: "300px",
-          height: "520px",
+          width: "var(--card-width, 300px)",
+          height: "var(--card-height, 520px)",
           display: "flex",
           flexDirection: "column",
+          transition: "transform 160ms ease, box-shadow 160ms ease",
+          overflow: "hidden",
         }}
       >
         <MantineCard.Section style={{ position: "relative" }}>
-          <Image
-            src={card.avatar_url}
-            alt={card.name || "Миниатюра карточки"}
-            height={370}
-            width={300}
-            fit="cover"
-            loading="lazy"
+          <Box
             style={{
-              filter: isCensored ? "blur(18px)" : "none",
-              transition: "filter 0.3s ease",
+              position: "relative",
+              height: "var(--card-image-height, 320px)",
+              overflow: "hidden",
             }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = "none";
-            }}
-          />
+          >
+            <Image
+              src={card.avatar_url}
+              alt={card.name || "Миниатюра карточки"}
+              fit="cover"
+              loading="lazy"
+              fallbackSrc="/favicon.svg"
+              style={{
+                height: "100%",
+                width: "100%",
+                filter: isCensored ? "blur(18px)" : "none",
+                transition: "filter 0.3s ease",
+              }}
+            />
+          </Box>
           <ActionIcon
-            variant="filled"
-            color="white"
+            variant="light"
             size="lg"
             radius="md"
             style={{
@@ -63,7 +82,8 @@ export function Card({ card }: CardProps) {
               top: "8px",
               right: "8px",
               zIndex: 10,
-              opacity: 0.8,
+              background: "rgba(255,255,255,0.75)",
+              backdropFilter: "blur(6px)",
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -87,8 +107,8 @@ export function Card({ card }: CardProps) {
           </ActionIcon>
         </MantineCard.Section>
 
-        <Stack gap="xs" mt="md" style={{ flex: 1, overflow: "hidden" }}>
-          <Text fw={500} size="lg" lineClamp={1}>
+        <Stack gap={6} mt="sm" style={{ flex: 1, overflow: "hidden" }}>
+          <Text fw={600} size="lg" lineClamp={1}>
             {card.name || "Без названия"}
           </Text>
 
@@ -98,20 +118,67 @@ export function Card({ card }: CardProps) {
             </Text>
           )}
 
-          {card.tags && card.tags.length > 0 && (
-            <Group gap="xs" mt="auto">
-              {card.tags.slice(0, 3).map((tag, index) => (
-                <Badge key={index} size="sm" variant="light">
+          <Group gap={6} wrap="nowrap" style={{ overflow: "hidden" }}>
+            {hasBook && (
+              <Tooltip label="У карточки есть Character Book" withArrow>
+                <Badge size="sm" color="gray" variant="light">
+                  Book
+                </Badge>
+              </Tooltip>
+            )}
+            {greetingsCount > 0 && (
+              <Tooltip label="Альтернативные приветствия (кол-во)" withArrow>
+                <Badge size="sm" color="gray" variant="light">
+                  G:{greetingsCount}
+                </Badge>
+              </Tooltip>
+            )}
+            <Tooltip label="Оценка токенов (заглушка)" withArrow>
+              <Badge size="sm" color="gray" variant="light">
+                {tokensEstimate} tok
+              </Badge>
+            </Tooltip>
+            {createdAtLabel && (
+              <Tooltip label="Дата создания (по файлу)" withArrow>
+                <Text size="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
+                  {createdAtLabel}
+                </Text>
+              </Tooltip>
+            )}
+          </Group>
+
+          <Group gap={6} wrap="nowrap" style={{ overflow: "hidden" }}>
+            {visibleTags.map((tag, idx) => (
+              <Tooltip key={tag} label={tag} withArrow>
+                <Badge
+                  size="sm"
+                  variant="light"
+                  color={idx === 0 ? "indigo" : "blue"}
+                  styles={{
+                    label: {
+                      maxWidth: 140,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    },
+                  }}
+                >
                   {tag}
                 </Badge>
-              ))}
-              {card.tags.length > 3 && (
+              </Tooltip>
+            ))}
+            {hiddenTagsCount > 0 && (
+              <Tooltip
+                label={hiddenTags.slice(0, 20).join(", ")}
+                withArrow
+                multiline
+                maw={320}
+              >
                 <Badge size="sm" variant="light" color="gray">
-                  +{card.tags.length - 3}
+                  +{hiddenTagsCount}
                 </Badge>
-              )}
-            </Group>
-          )}
+              </Tooltip>
+            )}
+          </Group>
         </Stack>
       </MantineCard>
 
@@ -119,7 +186,6 @@ export function Card({ card }: CardProps) {
         opened={opened}
         onClose={() => setOpened(false)}
         size="xl"
-        centered
         title={card.name || "Изображение карточки"}
       >
         <Box
@@ -134,14 +200,11 @@ export function Card({ card }: CardProps) {
             src={`/api/image/${card.id}`}
             alt={card.name || "Изображение карточки"}
             fit="contain"
+            fallbackSrc="/favicon.svg"
             style={{
               maxWidth: "100%",
               maxHeight: "80vh",
               filter: isCensored ? "blur(12px)" : "none",
-            }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = "none";
             }}
           />
         </Box>

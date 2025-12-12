@@ -8,6 +8,10 @@ export interface CardListItem {
   creator: string | null;
   avatar_url: string;
   file_path: string | null;
+  spec_version: string | null;
+  created_at: number;
+  alternate_greetings_count: number;
+  has_character_book: boolean;
 }
 
 export type TriState = "any" | "1" | "0";
@@ -163,6 +167,10 @@ export class CardsService {
         c.name,
         c.tags,
         c.creator,
+        c.spec_version,
+        c.created_at,
+        c.alternate_greetings_count,
+        c.has_character_book,
         c.avatar_path,
         (
           SELECT cf.file_path 
@@ -180,6 +188,10 @@ export class CardsService {
       name: string | null;
       tags: string | null;
       creator: string | null;
+      spec_version: string | null;
+      created_at: number;
+      alternate_greetings_count: number;
+      has_character_book: number;
       avatar_path: string | null;
       file_path: string | null;
     }>(sql, sqlParams);
@@ -205,6 +217,12 @@ export class CardsService {
         creator: row.creator,
         avatar_url: avatarUrl,
         file_path: row.file_path,
+        spec_version: row.spec_version,
+        created_at: row.created_at,
+        alternate_greetings_count: Number.isFinite(row.alternate_greetings_count)
+          ? row.alternate_greetings_count
+          : 0,
+        has_character_book: row.has_character_book === 1,
       };
     });
   }

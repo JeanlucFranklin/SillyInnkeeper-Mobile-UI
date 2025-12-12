@@ -11,6 +11,13 @@ export function CardsGrid() {
     [$cards, $isLoading, $error, $columnsCount, $isLocalStorageLoaded]
   );
 
+  const cardWidth = columnsCount === 3 ? 340 : columnsCount === 5 ? 280 : 240;
+  const gap = columnsCount === 7 ? 12 : 16;
+  const imageHeight = Math.round(cardWidth * 1.25);
+  // Fixed card height to avoid layout shift. Keep it tight to reduce "dead space"
+  // between meta row and tags when some fields are missing.
+  const cardHeight = imageHeight + 128;
+
   // Разбиваем карточки на строки для виртуализации
   const rows = useMemo(() => {
     const result: Array<Array<(typeof cards)[0]>> = [];
@@ -79,10 +86,13 @@ export function CardsGrid() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: `repeat(${columnsCount}, 300px)`,
-                gap: "16px",
-                marginBottom: "16px",
+                gridTemplateColumns: `repeat(${columnsCount}, ${cardWidth}px)`,
+                gap: `${gap}px`,
+                marginBottom: `${gap}px`,
                 justifyContent: "center",
+                ["--card-width" as any]: `${cardWidth}px`,
+                ["--card-image-height" as any]: `${imageHeight}px`,
+                ["--card-height" as any]: `${cardHeight}px`,
               }}
             >
               {row.map((card) => (
@@ -92,7 +102,10 @@ export function CardsGrid() {
               {row.length < columnsCount &&
                 Array.from({ length: columnsCount - row.length }).map(
                   (_, i) => (
-                    <div key={`empty-${i}`} style={{ width: "300px" }} />
+                    <div
+                      key={`empty-${i}`}
+                      style={{ width: `${cardWidth}px` }}
+                    />
                   )
                 )}
             </div>

@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
-import { Stack, Box, Container, Drawer, Button, Group } from "@mantine/core";
+import {
+  AppShell,
+  Box,
+  Button,
+  Container,
+  Drawer,
+  Group,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { useUnit } from "effector-react";
 import { loadFromApiFx } from "@/features/view-settings";
 import { ViewSettingsPanel } from "@/features/view-settings";
@@ -25,22 +35,47 @@ export function HomePage() {
   }, [loadFilters, loadSettings, onApply]);
 
   return (
-    <Box style={{ width: "100%", minHeight: "100vh" }}>
-      <Stack gap="xl" p="xl" style={{ maxWidth: "100%", width: "100%" }}>
-        <Container size="xl">
-          <Group justify="space-between" align="flex-start">
-            <ViewSettingsPanel />
-            <Button
-              variant="light"
-              onClick={() => setFiltersOpened(true)}
-              style={{ whiteSpace: "nowrap" }}
-            >
-              Фильтры
-            </Button>
+    <AppShell
+      header={{ height: 76 }}
+      padding="md"
+      styles={{
+        header: {
+          backdropFilter: "blur(10px)",
+          background: "rgba(255,255,255,0.85)",
+        },
+      }}
+    >
+      <AppShell.Header>
+        <Container size="xl" h="100%">
+          <Group justify="space-between" h="100%">
+            <Stack gap={2}>
+              <Title order={3} lh={1.1}>
+                SillyInnkeeper
+              </Title>
+              <Text size="sm" c="dimmed" lh={1.1}>
+                Библиотека карточек • быстрый поиск и фильтры
+              </Text>
+            </Stack>
+
+            <Group gap="sm" style={{ flexShrink: 0 }}>
+              <ViewSettingsPanel />
+              <Button
+                variant="light"
+                onClick={() => setFiltersOpened(true)}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                Фильтры
+              </Button>
+            </Group>
           </Group>
         </Container>
-        <CardsGrid />
-      </Stack>
+      </AppShell.Header>
+
+      <AppShell.Main>
+        <Box style={{ width: "100%" }}>
+          <CardsGrid />
+        </Box>
+      </AppShell.Main>
 
       <Drawer
         opened={filtersOpened}
@@ -48,12 +83,9 @@ export function HomePage() {
         position="right"
         size="md"
         title="Фильтры"
-        offset={10}
-        radius="md"
-        // overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
       >
         <CardsFiltersPanel />
       </Drawer>
-    </Box>
+    </AppShell>
   );
 }
