@@ -19,6 +19,7 @@ import {
   applyFilters,
   loadCardsFiltersFx,
 } from "@/features/cards-filters";
+import { CardDetailsDrawer } from "@/features/card-details";
 
 export function HomePage() {
   const [loadSettings, loadFilters, onApply] = useUnit([
@@ -86,6 +87,8 @@ export function HomePage() {
       >
         <CardsFiltersPanel />
       </Drawer>
+
+      <CardDetailsDrawer />
     </AppShell>
   );
 }

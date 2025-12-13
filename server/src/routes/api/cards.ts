@@ -16,6 +16,23 @@ function getDb(req: Request): Database.Database {
   return req.app.locals.db as Database.Database;
 }
 
+function safeJsonParse<T = unknown>(value: unknown): T | null {
+  if (typeof value !== "string") return null;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((v) => (typeof v === "string" ? v : String(v)))
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
 function parseString(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const v = value.trim();
@@ -170,6 +187,162 @@ router.get("/cards/filters", async (req: Request, res: Response) => {
     res
       .status(500)
       .json({ error: "Не удалось получить данные фильтров карточек" });
+  }
+});
+
+// GET /api/cards/:id - получение полной информации о карточке
+router.get("/cards/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const db = getDb(req);
+
+    const row = db
+      .prepare(
+        `
+        SELECT
+          c.id,
+          c.name,
+          c.description,
+          c.tags,
+          c.creator,
+          c.spec_version,
+          c.created_at,
+          c.avatar_path,
+          c.data_json,
+          c.personality,
+          c.scenario,
+          c.first_mes,
+          c.mes_example,
+          c.creator_notes,
+          c.system_prompt,
+          c.post_history_instructions,
+          c.alternate_greetings_count,
+          c.has_creator_notes,
+          c.has_system_prompt,
+          c.has_post_history_instructions,
+          c.has_personality,
+          c.has_scenario,
+          c.has_mes_example,
+          c.has_character_book,
+          c.prompt_tokens_est,
+          (
+            SELECT cf.file_path
+            FROM card_files cf
+            WHERE cf.card_id = c.id
+            LIMIT 1
+          ) AS file_path
+        FROM cards c
+        WHERE c.id = ?
+        LIMIT 1
+      `
+      )
+      .get(id) as
+      | {
+          id: string;
+          name: string | null;
+          description: string | null;
+          tags: string | null;
+          creator: string | null;
+          spec_version: string | null;
+          created_at: number;
+          avatar_path: string | null;
+          data_json: string;
+          personality: string | null;
+          scenario: string | null;
+          first_mes: string | null;
+          mes_example: string | null;
+          creator_notes: string | null;
+          system_prompt: string | null;
+          post_history_instructions: string | null;
+          alternate_greetings_count: number;
+          has_creator_notes: number;
+          has_system_prompt: number;
+          has_post_history_instructions: number;
+          has_personality: number;
+          has_scenario: number;
+          has_mes_example: number;
+          has_character_book: number;
+          prompt_tokens_est: number;
+          file_path: string | null;
+        }
+      | undefined;
+
+    if (!row) {
+      res.status(404).json({ error: "Карточка не найдена" });
+      return;
+    }
+
+    const tags = row.tags ? safeJsonParse<string[]>(row.tags) : null;
+    const data_json = safeJsonParse<unknown>(row.data_json);
+
+    // Extract greetings from data_json (V2/V3)
+    const dataNode =
+      data_json && typeof data_json === "object" && "data" in (data_json as any)
+        ? (data_json as any).data
+        : null;
+    const alternate_greetings = normalizeStringArray(
+      dataNode && typeof dataNode === "object"
+        ? (dataNode as any).alternate_greetings
+        : undefined
+    );
+    const group_only_greetings_raw =
+      dataNode && typeof dataNode === "object"
+        ? (dataNode as any).group_only_greetings
+        : undefined;
+    const group_only_greetings =
+      row.spec_version === "3.0"
+        ? normalizeStringArray(group_only_greetings_raw)
+        : undefined;
+
+    const avatar_url = row.avatar_path
+      ? `/api/thumbnail/${row.id}`
+      : "/api/thumbnail/default";
+
+    res.json({
+      id: row.id,
+      name: row.name,
+      creator: row.creator,
+      tags: tags ?? null,
+      spec_version: row.spec_version,
+      created_at: row.created_at,
+      file_path: row.file_path,
+      avatar_url,
+
+      // normalized content
+      description: row.description,
+      personality: row.personality,
+      scenario: row.scenario,
+      first_mes: row.first_mes,
+      mes_example: row.mes_example,
+      creator_notes: row.creator_notes,
+      system_prompt: row.system_prompt,
+      post_history_instructions: row.post_history_instructions,
+
+      // meta helpers
+      prompt_tokens_est: Number.isFinite(row.prompt_tokens_est)
+        ? row.prompt_tokens_est
+        : 0,
+      alternate_greetings_count: Number.isFinite(row.alternate_greetings_count)
+        ? row.alternate_greetings_count
+        : 0,
+      has_creator_notes: row.has_creator_notes === 1,
+      has_system_prompt: row.has_system_prompt === 1,
+      has_post_history_instructions: row.has_post_history_instructions === 1,
+      has_personality: row.has_personality === 1,
+      has_scenario: row.has_scenario === 1,
+      has_mes_example: row.has_mes_example === 1,
+      has_character_book: row.has_character_book === 1,
+
+      // extracted arrays (server-side)
+      alternate_greetings,
+      group_only_greetings,
+
+      // raw original object (for Raw tab / future export)
+      data_json,
+    });
+  } catch (error) {
+    logger.error(error, "Ошибка при получении карточки по id");
+    res.status(500).json({ error: "Не удалось получить карточку" });
   }
 });
 

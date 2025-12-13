@@ -1,4 +1,4 @@
-import type { CardListItem } from "@/shared/types/cards";
+import type { CardDetails, CardListItem } from "@/shared/types/cards";
 import type { CardsQuery } from "@/shared/types/cards-query";
 import type { CardsFiltersResponse } from "@/shared/types/cards-filters";
 
@@ -79,6 +79,16 @@ export async function getCardsFilters(): Promise<CardsFiltersResponse> {
 
   if (!response.ok) {
     throw new Error(`Ошибка загрузки фильтров: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function getCardDetails(id: string): Promise<CardDetails> {
+  const response = await fetch(`/api/cards/${encodeURIComponent(id)}`);
+
+  if (!response.ok) {
+    throw new Error(`Ошибка загрузки карточки: ${response.statusText}`);
   }
 
   return response.json();

@@ -14,6 +14,7 @@ import {
 import { useUnit } from "effector-react";
 import type { CardListItem } from "@/shared/types/cards";
 import { $isCensored } from "@/features/view-settings";
+import { openCard } from "@/features/card-details";
 
 interface CardProps {
   card: CardListItem;
@@ -37,7 +38,7 @@ function formatTokensEstimate(value: unknown): string {
 }
 
 export function Card({ card }: CardProps) {
-  const [isCensored] = useUnit([$isCensored]);
+  const [isCensored, onOpen] = useUnit([$isCensored, openCard]);
   const [opened, setOpened] = useState(false);
 
   const tags = card.tags ?? [];
@@ -66,6 +67,16 @@ export function Card({ card }: CardProps) {
           flexDirection: "column",
           transition: "transform 160ms ease, box-shadow 160ms ease",
           overflow: "hidden",
+          cursor: "pointer",
+        }}
+        role="button"
+        tabIndex={0}
+        onClick={() => onOpen(card.id)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen(card.id);
+          }
         }}
       >
         <MantineCard.Section style={{ position: "relative" }}>
