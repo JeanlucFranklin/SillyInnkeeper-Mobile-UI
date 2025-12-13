@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express, { Express } from "express";
 import Database from "better-sqlite3";
+import path from "node:path";
+import { existsSync } from "node:fs";
 import { initializeDatabase } from "./plugins/database";
 import rootRoutes from "./routes/root";
 import apiRoutes from "./routes/api";
@@ -37,9 +39,33 @@ export async function createApp(
   const fsWatcher = new FsWatcherService(cardsSyncOrchestrator);
   app.locals.fsWatcher = fsWatcher;
 
-  // Подключение маршрутов
+  // Служебные маршруты
   app.use("/", rootRoutes);
+
+  // API должно иметь приоритет и не попадать под SPA fallback
   app.use("/api", apiRoutes);
+
+  // Раздача сбилженного фронтенда: client/dist
+  const clientDistPath = path.resolve(__dirname, "../../client/dist");
+  if (existsSync(clientDistPath)) {
+    app.use(
+      express.static(clientDistPath, {
+        setHeaders(res, filePath) {
+          // Чтобы браузер не "залипал" на старом index.html и не тянул старые чанки
+          if (filePath.endsWith("index.html")) {
+            res.setHeader("Cache-Control", "no-cache");
+          }
+        },
+      })
+    );
+
+    // SPA fallback (для роутов фронта вроде /cards/123)
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith("/api")) return next();
+      res.setHeader("Cache-Control", "no-cache");
+      res.sendFile(path.join(clientDistPath, "index.html"));
+    });
+  }
 
   return { app, db };
 }

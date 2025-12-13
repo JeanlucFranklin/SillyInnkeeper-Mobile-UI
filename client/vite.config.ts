@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -36,6 +36,10 @@ export default defineConfig({
   // В prod: делаем предсказуемые чанки, чтобы первый экран не тянул "всё сразу"
   build: {
     sourcemap: false,
+    // esbuild-minify иногда ломает порядок инициализации (TDZ) в ESM при сложных чанках
+    // (симптом: "Cannot access 'X' before initialization" в vendor/effector чанках).
+    // Terser обычно ведёт себя стабильнее для таких кейсов.
+    minify: "terser",
     chunkSizeWarningLimit: 750,
     rollupOptions: {
       output: {
@@ -44,9 +48,9 @@ export default defineConfig({
 
           if (p.includes("node_modules")) {
             if (p.includes("@mantine/")) return "mantine";
-            if (p.includes("effector")) return "effector";
-            if (p.includes("/react-dom/") || p.includes("/react/"))
-              return "react";
+            // if (p.includes("effector")) return "effector";
+            // if (p.includes("/react-dom/") || p.includes("/react/"))
+            //   return "react";
             return "vendor";
           }
 
