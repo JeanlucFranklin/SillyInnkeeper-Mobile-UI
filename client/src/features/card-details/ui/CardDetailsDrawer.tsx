@@ -25,6 +25,7 @@ import {
 import type { CardDetails } from "@/shared/types/cards";
 import { $details, $error, $isLoading, $openedId, closeCard } from "../model";
 import { $isCensored } from "@/features/view-settings";
+import { CreatorNotesRenderer } from "./CreatorNotesRenderer";
 
 function formatDateRu(ms: number | null | undefined): string {
   const t = typeof ms === "number" ? ms : Number(ms);
@@ -377,23 +378,10 @@ export function CardDetailsDrawer() {
                             </div>
 
                             <div>
-                              <Text size="sm" fw={600} mb={6}>
-                                Creator notes
-                              </Text>
-                              {details?.creator_notes &&
-                              details.creator_notes.trim().length > 0 ? (
-                                <Spoiler
-                                  maxHeight={140}
-                                  showLabel="Показать"
-                                  hideLabel="Скрыть"
-                                >
-                                  <Text style={{ whiteSpace: "pre-wrap" }}>
-                                    {details.creator_notes}
-                                  </Text>
-                                </Spoiler>
-                              ) : (
-                                <Text c="dimmed">—</Text>
-                              )}
+                              <CreatorNotesRenderer
+                                value={details?.creator_notes}
+                                defaultMaxHeight={140}
+                              />
                             </div>
                           </Stack>
                         </Grid.Col>
