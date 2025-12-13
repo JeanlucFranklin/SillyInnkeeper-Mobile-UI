@@ -43,8 +43,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!settings?.cardsFolderPath) return;
-
     let stop: (() => void) | undefined;
     void import("@/features/cards-live-sync").then((m) => {
       m.startLiveSync();
@@ -52,7 +50,7 @@ export default function App() {
     });
 
     return () => stop?.();
-  }, [settings?.cardsFolderPath]);
+  }, []);
 
   // Показываем прелоадер при первой загрузке
   if (isLoading && settings === null) {

@@ -21,6 +21,7 @@ const connected = createEvent<void>();
 let client: EventsClient | null = null;
 
 const SCAN_NOTIFICATION_ID = "scan-status";
+let scanPollTimer: ReturnType<typeof setInterval> | null = null;
 
 function shortFolderLabel(folderPath: string): string {
   const parts = folderPath.split(/[\\/]+/).filter(Boolean);
@@ -42,6 +43,10 @@ startLiveSync.watch(() => {
 });
 
 stopLiveSync.watch(() => {
+  if (scanPollTimer) {
+    clearInterval(scanPollTimer);
+    scanPollTimer = null;
+  }
   client?.close();
   client = null;
 });
@@ -72,6 +77,13 @@ sample({
 scanStarted.watch((evt) => {
   const total = Math.max(0, evt.totalFiles);
   const folder = shortFolderLabel(evt.folderPath);
+
+  // During scan: periodically refresh cards list so user sees it updating.
+  if (scanPollTimer) clearInterval(scanPollTimer);
+  scanPollTimer = setInterval(() => {
+    applyFilters();
+  }, 2000);
+
   notifications.show({
     id: SCAN_NOTIFICATION_ID,
     title: "Сканирование карточек",
@@ -106,6 +118,14 @@ scanFinished.watch((evt) => {
   const done = Math.max(0, evt.processedFiles);
   const seconds = (evt.durationMs / 1000).toFixed(1);
   const folder = shortFolderLabel(evt.folderPath);
+
+  if (scanPollTimer) {
+    clearInterval(scanPollTimer);
+    scanPollTimer = null;
+  }
+  // Final refresh right after finishing scan
+  applyFilters();
+
   notifications.update({
     id: SCAN_NOTIFICATION_ID,
     title: "Сканирование завершено",
