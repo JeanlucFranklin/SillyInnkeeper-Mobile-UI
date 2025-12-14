@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   AppShell,
   Box,
+  ActionIcon,
   Button,
   Container,
   Drawer,
@@ -12,8 +13,11 @@ import {
 } from "@mantine/core";
 import { useUnit } from "effector-react";
 import { useTranslation } from "react-i18next";
-import { loadFromApiFx } from "@/features/view-settings";
-import { ViewSettingsPanel } from "@/features/view-settings";
+import {
+  $colorScheme,
+  cycleColorScheme,
+  ViewSettingsPanel,
+} from "@/features/view-settings";
 import { CardsGrid } from "@/features/cards-grid";
 import { PathsSettingsModal } from "@/features/paths-settings";
 import {
@@ -23,21 +27,72 @@ import {
 } from "@/features/cards-filters";
 import { CardDetailsDrawer } from "@/features/card-details";
 
+function SunIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3a7 7 0 0 0 9 9 9 9 0 1 1-9-9z" />
+    </svg>
+  );
+}
+
 export function HomePage() {
   const { t } = useTranslation();
-  const [loadSettings, loadFilters, onApply] = useUnit([
-    loadFromApiFx,
+  const [loadFilters, onApply, colorScheme, cycleScheme] = useUnit([
     loadCardsFiltersFx,
     applyFilters,
+    $colorScheme,
+    cycleColorScheme,
   ]);
   const [filtersOpened, setFiltersOpened] = useState(false);
   const [pathsOpened, setPathsOpened] = useState(false);
 
   useEffect(() => {
-    loadSettings();
     loadFilters();
     onApply();
-  }, [loadFilters, loadSettings, onApply]);
+  }, [loadFilters, onApply]);
+
+  const schemeLabel =
+    colorScheme === "light"
+      ? t("theme.light")
+      : colorScheme === "dark"
+      ? t("theme.dark")
+      : t("theme.auto");
 
   return (
     <AppShell
@@ -46,7 +101,8 @@ export function HomePage() {
       styles={{
         header: {
           backdropFilter: "blur(10px)",
-          background: "rgba(255,255,255,0.85)",
+          backgroundColor: "var(--mantine-color-body)",
+          borderBottom: "1px solid var(--mantine-color-default-border)",
         },
       }}
     >
@@ -63,6 +119,23 @@ export function HomePage() {
             </Stack>
 
             <Group gap="sm" style={{ flexShrink: 0 }}>
+              <ActionIcon
+                variant="light"
+                size="lg"
+                onClick={() => cycleScheme()}
+                aria-label={t("theme.cycleAria", { mode: schemeLabel })}
+                title={t("theme.cycleTitle", { mode: schemeLabel })}
+              >
+                {colorScheme === "dark" ? (
+                  <MoonIcon />
+                ) : colorScheme === "light" ? (
+                  <SunIcon />
+                ) : (
+                  <Text fw={800} size="sm">
+                    A
+                  </Text>
+                )}
+              </ActionIcon>
               <ViewSettingsPanel />
               <Button
                 variant="light"

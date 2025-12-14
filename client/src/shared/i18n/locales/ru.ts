@@ -19,6 +19,13 @@ const ru = {
     close: "Закрыть",
     zoomIn: "Увеличить",
   },
+  theme: {
+    light: "Светлая",
+    dark: "Тёмная",
+    auto: "Авто",
+    cycleAria: "Переключить тему (сейчас: {{mode}})",
+    cycleTitle: "Тема: {{mode}} (клик — переключить)",
+  },
   errors: {
     generic: "Ошибка",
     loadSettingsTitle: "Ошибка загрузки настроек",

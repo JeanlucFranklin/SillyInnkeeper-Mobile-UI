@@ -19,6 +19,13 @@ const en = {
     close: "Close",
     zoomIn: "Zoom in",
   },
+  theme: {
+    light: "Light",
+    dark: "Dark",
+    auto: "Auto",
+    cycleAria: "Switch theme (current: {{mode}})",
+    cycleTitle: "Theme: {{mode}} (click to switch)",
+  },
   errors: {
     generic: "Error",
     loadSettingsTitle: "Failed to load settings",

@@ -34,7 +34,9 @@ router.put("/view-settings", async (req: Request, res: Response) => {
       typeof newSettings !== "object" ||
       newSettings === null ||
       !("columnsCount" in newSettings) ||
-      !("isCensored" in newSettings)
+      !("isCensored" in newSettings) ||
+      ("colorScheme" in newSettings &&
+        typeof newSettings.colorScheme !== "string")
     ) {
       throw new AppError({
         status: 400,

@@ -1,8 +1,10 @@
 export type ColumnsCount = 3 | 5 | 7;
+export type ColorScheme = "light" | "dark" | "auto";
 
 export interface ViewSettings {
   columnsCount: ColumnsCount;
   isCensored: boolean;
+  colorScheme: ColorScheme;
 }
 
 import i18n from "@/shared/i18n/i18n";

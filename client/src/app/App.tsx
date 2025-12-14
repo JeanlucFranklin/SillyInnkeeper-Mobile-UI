@@ -14,6 +14,10 @@ import { useTranslation } from "react-i18next";
 import { theme } from "@/theme";
 import i18n from "@/shared/i18n/i18n";
 import {
+  $colorScheme,
+  loadFromApiFx as loadViewSettingsFx,
+} from "@/features/view-settings";
+import {
   $settings,
   $isLoading,
   $error,
@@ -38,11 +42,17 @@ function ChunkFallback() {
 }
 
 export default function App() {
-  const [settings, isLoading, error] = useUnit([$settings, $isLoading, $error]);
+  const [settings, isLoading, error, colorScheme] = useUnit([
+    $settings,
+    $isLoading,
+    $error,
+    $colorScheme,
+  ]);
   const { t } = useTranslation();
 
   useEffect(() => {
     loadSettingsFx();
+    loadViewSettingsFx();
   }, []);
 
   useEffect(() => {
@@ -68,7 +78,11 @@ export default function App() {
   // Показываем прелоадер при первой загрузке
   if (isLoading && settings === null) {
     return (
-      <MantineProvider theme={theme}>
+      <MantineProvider
+        theme={theme}
+        defaultColorScheme={colorScheme}
+        forceColorScheme={colorScheme === "auto" ? undefined : colorScheme}
+      >
         <Notifications position="top-right" />
         <Center h="100vh">
           <Loader size="lg" />
@@ -80,7 +94,11 @@ export default function App() {
   // Показываем ошибку загрузки
   if (error && settings === null) {
     return (
-      <MantineProvider theme={theme}>
+      <MantineProvider
+        theme={theme}
+        defaultColorScheme={colorScheme}
+        forceColorScheme={colorScheme === "auto" ? undefined : colorScheme}
+      >
         <Notifications position="top-right" />
         <Container size="md" py="xl">
           <Alert color="red" title={t("errors.loadSettingsTitle")}>
@@ -94,7 +112,11 @@ export default function App() {
   // Если cardsFolderPath не установлен, показываем форму настроек
   if (settings?.cardsFolderPath === null) {
     return (
-      <MantineProvider theme={theme}>
+      <MantineProvider
+        theme={theme}
+        defaultColorScheme={colorScheme}
+        forceColorScheme={colorScheme === "auto" ? undefined : colorScheme}
+      >
         <Notifications position="top-right" />
         <Suspense fallback={<ChunkFallback />}>
           <PathsSetupScreen />
@@ -105,7 +127,11 @@ export default function App() {
 
   // Иначе показываем главную страницу
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider
+      theme={theme}
+      defaultColorScheme={colorScheme}
+      forceColorScheme={colorScheme === "auto" ? undefined : colorScheme}
+    >
       <Notifications position="top-right" />
       <Suspense fallback={<ChunkFallback />}>
         <HomePage />
