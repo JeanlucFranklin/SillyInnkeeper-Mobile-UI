@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import Database from "better-sqlite3";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { unlink } from "fs-extra";
 import { createCardsService } from "../../services/cards";
 import { logger } from "../../utils/logger";
 import type {
@@ -15,6 +16,7 @@ import { getOrCreateLibraryId } from "../../services/libraries";
 import { AppError } from "../../errors/app-error";
 import { sendError } from "../../errors/http";
 import { buildPngWithCcv3TextChunk } from "../../services/png-export";
+import { deleteThumbnail } from "../../services/thumbnail";
 import {
   makeAttachmentContentDisposition,
   sanitizeWindowsFilenameBase,
@@ -390,6 +392,24 @@ router.get("/cards/:id", async (req: Request, res: Response) => {
       throw new AppError({ status: 404, code: "api.cards.not_found" });
     }
 
+    const fileRows = db
+      .prepare(
+        `
+        SELECT cf.file_path
+        FROM card_files cf
+        WHERE cf.card_id = ?
+        ORDER BY cf.file_birthtime ASC, cf.file_path ASC
+      `
+      )
+      .all(id) as Array<{ file_path: string }>;
+
+    const file_paths = fileRows
+      .map((r) => r.file_path)
+      .filter((p) => typeof p === "string" && p.trim().length > 0);
+    const duplicates = row.file_path
+      ? file_paths.filter((p) => p !== row.file_path)
+      : file_paths.slice(1);
+
     const tags = row.tags ? safeJsonParse<string[]>(row.tags) : null;
     const data_json = safeJsonParse<unknown>(row.data_json);
 
@@ -424,6 +444,8 @@ router.get("/cards/:id", async (req: Request, res: Response) => {
       spec_version: row.spec_version,
       created_at: row.created_at,
       file_path: row.file_path,
+      file_paths,
+      duplicates,
       avatar_url,
 
       // normalized content
@@ -461,6 +483,94 @@ router.get("/cards/:id", async (req: Request, res: Response) => {
   } catch (error) {
     logger.errorKey(error, "api.cards.get_failed");
     return sendError(res, error, { status: 500, code: "api.cards.get_failed" });
+  }
+});
+
+// DELETE /api/cards/:id/files - удаление конкретного файла карточки (дубликата)
+router.delete("/cards/:id/files", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const file_path = (req.body as any)?.file_path;
+    if (typeof file_path !== "string" || file_path.trim().length === 0) {
+      throw new AppError({ status: 400, code: "api.cards.invalid_file_path" });
+    }
+
+    const db = getDb(req);
+    const normalizedFilePath = file_path.trim();
+
+    const belongs = db
+      .prepare(
+        `
+        SELECT 1
+        FROM card_files
+        WHERE card_id = ? AND file_path = ?
+        LIMIT 1
+      `
+      )
+      .get(id, normalizedFilePath) as { 1: number } | undefined;
+
+    if (!belongs) {
+      throw new AppError({ status: 404, code: "api.cards.file_not_found" });
+    }
+
+    // Текущее число файлов у карточки
+    const before = db
+      .prepare(
+        `
+        SELECT COUNT(*) as cnt
+        FROM card_files
+        WHERE card_id = ?
+      `
+      )
+      .get(id) as { cnt: number };
+
+    // Сохраняем avatar_path на случай удаления последнего файла
+    const cardRow = db
+      .prepare(`SELECT avatar_path FROM cards WHERE id = ? LIMIT 1`)
+      .get(id) as { avatar_path: string | null } | undefined;
+
+    // Транзакция: сначала удаляем привязку файла, затем (опционально) карточку
+    db.transaction(() => {
+      db.prepare(`DELETE FROM card_files WHERE file_path = ?`).run(
+        normalizedFilePath
+      );
+
+      const after = db
+        .prepare(
+          `
+          SELECT COUNT(*) as cnt
+          FROM card_files
+          WHERE card_id = ?
+        `
+        )
+        .get(id) as { cnt: number };
+
+      if ((after?.cnt ?? 0) === 0) {
+        db.prepare(`DELETE FROM cards WHERE id = ?`).run(id);
+      }
+    })();
+
+    // Удаляем файл с диска (best-effort): если уже удалён — ок.
+    await unlink(normalizedFilePath).catch((e: any) => {
+      if (e && (e.code === "ENOENT" || e.code === "ENOTDIR")) return;
+      throw e;
+    });
+
+    // Если до было 1 файл, мы удалили карточку — чистим миниатюру
+    if ((before?.cnt ?? 0) <= 1 && cardRow?.avatar_path) {
+      const uuid = cardRow.avatar_path.split("/").pop()?.replace(".webp", "");
+      if (uuid) {
+        await deleteThumbnail(uuid);
+      }
+    }
+
+    res.json({ ok: true });
+  } catch (error) {
+    logger.errorKey(error, "api.cards.delete_file_failed");
+    return sendError(res, error, {
+      status: 500,
+      code: "api.cards.delete_file_failed",
+    });
   }
 });
 

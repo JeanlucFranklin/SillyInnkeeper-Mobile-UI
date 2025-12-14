@@ -20,6 +20,8 @@ export interface CardDetails {
   spec_version: string | null;
   created_at: number;
   file_path: string | null;
+  file_paths?: string[];
+  duplicates?: string[];
   avatar_url: string;
 
   description: string | null;

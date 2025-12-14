@@ -16,6 +16,7 @@ const en = {
     hide: "Hide",
     copy: "Copy",
     copied: "Copied",
+    cancel: "Cancel",
     close: "Close",
     zoomIn: "Zoom in",
   },
@@ -166,6 +167,14 @@ const en = {
     stImportOkMessage: "Import succeeded (cardId: {{cardId}})",
     stImportFailTitle: "SillyTavern import",
     stImportFailMessage: "Import failed (cardId: {{cardId}})",
+    duplicatesTitle: "Duplicates",
+    showInExplorer: "Show in Explorer (soon)",
+    deleteDuplicate: "Delete duplicate",
+    confirmDeleteDuplicateTitle: "Delete duplicate?",
+    confirmDeleteDuplicateMessage:
+      "The file will be deleted from disk and from the database. This action cannot be undone.",
+    duplicateDeleted: "Duplicate deleted",
+    duplicateDeleteFailed: "Failed to delete duplicate",
   },
   creatorNotes: {
     title: "Creator notes",

@@ -108,3 +108,25 @@ export async function getCardDetails(id: string): Promise<CardDetails> {
 
   return response.json();
 }
+
+export async function deleteCardFileDuplicate(
+  cardId: string,
+  filePath: string
+): Promise<{ ok: true }> {
+  const response = await fetch(
+    `/api/cards/${encodeURIComponent(cardId)}/files`,
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_path: filePath }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = (await response.text().catch(() => "")).trim();
+    if (errorText) throw new Error(errorText);
+    throw new Error(response.statusText);
+  }
+
+  return response.json();
+}
