@@ -12,6 +12,7 @@ import thumbnail from "./thumbnail";
 import image from "./image";
 import events from "./events";
 import st from "./st";
+import explorer from "./explorer";
 
 const router = Router();
 
@@ -71,5 +72,6 @@ router.use(thumbnail);
 router.use(image);
 router.use(events);
 router.use(st);
+router.use(explorer);
 
 export default router;

@@ -6,14 +6,19 @@ import {
   Alert,
   Paper,
   Select,
+  ActionIcon,
+  Tooltip,
+  Loader,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useUnit } from "effector-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { notifications } from "@mantine/notifications";
 import { saveSettingsFx, $error, $isLoading } from "@/entities/settings";
 import i18n from "@/shared/i18n/i18n";
 import type { Settings } from "@/shared/types/settings";
+import { pickFolder } from "@/shared/api/explorer";
 
 type SettingsFormValues = {
   cardsFolderPath: string;
@@ -57,6 +62,24 @@ export function SettingsForm({
     $isLoading,
     saveSettingsFx,
   ]);
+  const [isPickingFolder, setIsPickingFolder] = useState(false);
+
+  const FolderIcon = ({ size = 16 }: { size?: number }) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+    </svg>
+  );
 
   const resolvedTitle = title ?? t("setup.appSettingsTitle");
   const resolvedDescription = description ?? t("settingsForm.description");
@@ -146,6 +169,44 @@ export function SettingsForm({
           label={t("settingsForm.cardsFolderPathLabel")}
           placeholder={t("settingsForm.cardsFolderPathPlaceholder")}
           required
+          rightSectionWidth={42}
+          rightSection={
+            <Tooltip
+              label={t("settingsForm.pickFolderTooltip")}
+              withArrow
+              position="top"
+            >
+              <ActionIcon
+                variant="subtle"
+                onClick={() => {
+                  if (isLoading || isPickingFolder) return;
+                  setIsPickingFolder(true);
+                  void pickFolder(t("settingsForm.pickFolderDialogTitle"))
+                    .then((res) => {
+                      if (res.cancelled || !res.path) return;
+                      form.setFieldValue("cardsFolderPath", res.path);
+                      form.validateField("cardsFolderPath");
+                    })
+                    .catch((e) => {
+                      const msg =
+                        e instanceof Error && e.message.trim()
+                          ? e.message
+                          : t("settingsForm.pickFolderFailed");
+                      notifications.show({
+                        title: t("settingsForm.cardsFolderPathLabel"),
+                        message: msg,
+                        color: "red",
+                      });
+                    })
+                    .finally(() => setIsPickingFolder(false));
+                }}
+                disabled={isLoading || isPickingFolder}
+                aria-label={t("settingsForm.pickFolderAria")}
+              >
+                {isPickingFolder ? <Loader size={16} /> : <FolderIcon />}
+              </ActionIcon>
+            </Tooltip>
+          }
           {...form.getInputProps("cardsFolderPath")}
         />
 

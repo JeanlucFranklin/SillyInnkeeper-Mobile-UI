@@ -84,6 +84,16 @@ const en = {
   "api.thumbnail.not_found": "Thumbnail was not found",
   "api.thumbnail.get_failed": "Could not get thumbnail",
 
+  "api.explorer.invalid_format":
+    "Invalid data format. Expected object with field path (string) or title (string)",
+  "api.explorer.path_not_exists": "Path does not exist: {path}",
+  "api.explorer.not_a_file": "Path is not a file: {path}",
+  "api.explorer.not_a_directory": "Path is not a directory: {path}",
+  "api.explorer.unsupported_platform": "Unsupported platform: {platform}",
+  "api.explorer.dialog_not_available":
+    "Folder picker dialog is not available on this system",
+  "api.explorer.open_failed": "Could not open in file explorer",
+
   // logs (localized)
   "log.server.readLanguageSettingsFailed": "Failed to read language settings",
   "log.server.started": "Server started on {host}:{port}",

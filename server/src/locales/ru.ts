@@ -90,6 +90,16 @@ const ru = {
   "api.thumbnail.not_found": "Миниатюра не найдена",
   "api.thumbnail.get_failed": "Не удалось получить миниатюру",
 
+  "api.explorer.invalid_format":
+    "Неверный формат данных. Ожидается объект с полем path (string) или title (string)",
+  "api.explorer.path_not_exists": "Путь не существует: {path}",
+  "api.explorer.not_a_file": "Путь не является файлом: {path}",
+  "api.explorer.not_a_directory": "Путь не является директорией: {path}",
+  "api.explorer.unsupported_platform": "Неподдерживаемая платформа: {platform}",
+  "api.explorer.dialog_not_available":
+    "Диалог выбора папки недоступен в этой системе",
+  "api.explorer.open_failed": "Не удалось открыть в проводнике",
+
   // logs (localized)
   "log.server.readLanguageSettingsFailed": "Ошибка при чтении настроек языка",
   "log.server.started": "Сервер запущен на {host}:{port}",
