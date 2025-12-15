@@ -294,27 +294,20 @@ SillyInnkeeper integrates with SillyTavern through the [ST-Extension-SillyInnkee
    - Managing and editing cards, chats, lorebooks, etc.
    - Two-way synchronization between SillyInnkeeper and SillyTavern
 
-2. **In-App Editing**
-
-   - Built-in card editor
-   - Editing all Character Card fields
-   - Saving changes back to PNG file
-   - Data validation when editing
-
-3. **Lorebook Support**
+2. **Lorebook Support**
 
    - Viewing and managing lorebooks from cards
    - Editing lorebooks
    - Export/import lorebooks
 
-4. **Multiple Directories Support**
+3. **Multiple Directories Support**
 
    - Support for multiple card libraries
    - Switching between libraries
    - Unified search across all libraries
    - Library management through UI
 
-5. **Auto-Download and Auto-Import**
+4. **Auto-Download and Auto-Import**
 
    - Monitoring downloads folder
    - Automatic scanning of new files
