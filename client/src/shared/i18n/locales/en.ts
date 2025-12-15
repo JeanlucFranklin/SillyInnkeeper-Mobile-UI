@@ -203,6 +203,17 @@ const en = {
     renameMainFilePlaceholder: "Enter name…",
     renameOk: "File renamed",
     renameFailed: "Failed to rename file",
+
+    edit: "Edit",
+    preview: "Preview",
+    collapseOneLine: "Collapse to one line",
+    expandOneLine: "Expand",
+    openInModal: "Open in modal",
+    addField: "Add",
+    duplicateField: "Duplicate",
+    deleteField: "Delete",
+    unsavedChangesHint:
+      "Changes are not saved yet (backend save will be added later).",
   },
   creatorNotes: {
     title: "Creator notes",

@@ -206,6 +206,17 @@ const ru = {
     renameMainFilePlaceholder: "Введите имя…",
     renameOk: "Файл переименован",
     renameFailed: "Не удалось переименовать файл",
+
+    edit: "Редактирование",
+    preview: "Предпросмотр",
+    collapseOneLine: "Свернуть в одну строку",
+    expandOneLine: "Развернуть",
+    openInModal: "Открыть в большом окне",
+    addField: "Добавить",
+    duplicateField: "Дублировать",
+    deleteField: "Удалить",
+    unsavedChangesHint:
+      "Изменения пока не сохраняются (сохранение на бэкенд добавим позже).",
   },
   creatorNotes: {
     title: "Заметки автора",
