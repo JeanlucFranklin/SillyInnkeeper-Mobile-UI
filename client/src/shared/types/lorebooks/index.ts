@@ -24,4 +24,35 @@ export interface LorebookDetails {
   cards: LorebookLinkedCard[];
 }
 
+// Lorebook Entry types according to SPEC_V3.md
+export interface LorebookEntry {
+  keys: string[];
+  content: string;
+  extensions: Record<string, any>;
+  enabled: boolean;
+  insertion_order: number;
+  case_sensitive?: boolean;
+  use_regex: boolean;
+  constant?: boolean;
+  // Optional fields
+  name?: string;
+  priority?: number;
+  id?: number | string;
+  comment?: string;
+  selective?: boolean;
+  secondary_keys?: string[];
+  position?: "before_char" | "after_char";
+}
+
+// Lorebook structure according to SPEC_V3.md
+export interface Lorebook {
+  name?: string;
+  description?: string;
+  scan_depth?: number;
+  token_budget?: number;
+  recursive_scanning?: boolean;
+  extensions: Record<string, any>;
+  entries: LorebookEntry[];
+}
+
 
