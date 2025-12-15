@@ -38,6 +38,10 @@ const en = {
     saveViewSettings: "Failed to save view settings",
     loadTags: "Failed to load tags",
     saveFailed: "Failed to save",
+    loadLorebooks: "Failed to load lorebooks",
+    loadLorebook: "Failed to load lorebook",
+    saveLorebook: "Failed to save lorebook",
+    deleteLorebook: "Failed to delete lorebook",
   },
   empty: {
     dash: "—",

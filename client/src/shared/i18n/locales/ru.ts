@@ -38,6 +38,10 @@ const ru = {
     saveViewSettings: "Ошибка сохранения настроек отображения",
     loadTags: "Ошибка загрузки тегов",
     saveFailed: "Ошибка сохранения",
+    loadLorebooks: "Ошибка загрузки лорбуков",
+    loadLorebook: "Ошибка загрузки лорбука",
+    saveLorebook: "Ошибка сохранения лорбука",
+    deleteLorebook: "Ошибка удаления лорбука",
   },
   empty: {
     dash: "—",
