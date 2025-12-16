@@ -2,8 +2,16 @@ import { useMemo } from "react";
 import { useUnit } from "effector-react";
 import { useTranslation } from "react-i18next";
 import { Button, Group, Paper, Stack, Text } from "@mantine/core";
-import type { Lorebook, LorebookDetails, LorebookEntry } from "@/shared/types/lorebooks";
-import { $lorebook, lorebookChanged, lorebookCleared } from "../../../model.form";
+import type {
+  Lorebook,
+  LorebookDetails,
+  LorebookEntry,
+} from "@/shared/types/lorebooks";
+import {
+  $lorebook,
+  lorebookChanged,
+  lorebookCleared,
+} from "../../../model.form";
 import {
   $isSavingSharedLorebook,
   $lorebookEditMode,
@@ -25,7 +33,49 @@ function createEmptyEntry(): LorebookEntry {
 }
 
 function ensureLorebookStructure(data: unknown): Lorebook {
-  if (!data || typeof data !== "object") {
+  const isPlainObject = (v: unknown): v is Record<string, any> =>
+    Boolean(v) && typeof v === "object" && !Array.isArray(v);
+
+  const normalizeEntry = (raw: unknown): LorebookEntry => {
+    if (!isPlainObject(raw)) return createEmptyEntry();
+
+    const keysOk =
+      Array.isArray(raw.keys) &&
+      raw.keys.every((k: unknown) => typeof k === "string");
+    const contentOk = typeof raw.content === "string";
+    const extensionsOk = isPlainObject(raw.extensions);
+    const enabledOk = typeof raw.enabled === "boolean";
+    const insertionOrderOk = typeof raw.insertion_order === "number";
+    const useRegexOk = typeof raw.use_regex === "boolean";
+
+    // Fast path: keep reference to avoid re-rendering all entries on each change.
+    if (
+      keysOk &&
+      contentOk &&
+      extensionsOk &&
+      enabledOk &&
+      insertionOrderOk &&
+      useRegexOk
+    ) {
+      return raw as LorebookEntry;
+    }
+
+    return {
+      ...createEmptyEntry(),
+      ...raw,
+      keys: Array.isArray(raw.keys)
+        ? raw.keys.filter((k) => typeof k === "string")
+        : [],
+      content: typeof raw.content === "string" ? raw.content : "",
+      extensions: isPlainObject(raw.extensions) ? raw.extensions : {},
+      enabled: typeof raw.enabled === "boolean" ? raw.enabled : true,
+      insertion_order:
+        typeof raw.insertion_order === "number" ? raw.insertion_order : 0,
+      use_regex: typeof raw.use_regex === "boolean" ? raw.use_regex : false,
+    };
+  };
+
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
     return {
       extensions: {},
       entries: [],
@@ -39,23 +89,13 @@ function ensureLorebookStructure(data: unknown): Lorebook {
     scan_depth: lb.scan_depth,
     token_budget: lb.token_budget,
     recursive_scanning: lb.recursive_scanning,
-    extensions: lb.extensions && typeof lb.extensions === "object" ? lb.extensions : {},
-    entries: Array.isArray(lb.entries)
-      ? lb.entries.map((entry) => ({
-          ...createEmptyEntry(),
-          ...entry,
-          keys: Array.isArray(entry.keys) ? entry.keys : [],
-          content: typeof entry.content === "string" ? entry.content : "",
-          extensions:
-            entry.extensions && typeof entry.extensions === "object"
-              ? entry.extensions
-              : {},
-          enabled: typeof entry.enabled === "boolean" ? entry.enabled : true,
-          insertion_order:
-            typeof entry.insertion_order === "number" ? entry.insertion_order : 0,
-          use_regex: typeof entry.use_regex === "boolean" ? entry.use_regex : false,
-        }))
-      : [],
+    extensions:
+      lb.extensions &&
+      typeof lb.extensions === "object" &&
+      !Array.isArray(lb.extensions)
+        ? (lb.extensions as Record<string, any>)
+        : {},
+    entries: Array.isArray(lb.entries) ? lb.entries.map(normalizeEntry) : [],
   };
 }
 
@@ -68,7 +108,14 @@ export function LorebookEditor({
 }) {
   const { t } = useTranslation();
 
-  const [lorebook, changeLorebook, clearLorebook, editMode, saveShared, isSavingShared] = useUnit([
+  const [
+    lorebook,
+    changeLorebook,
+    clearLorebook,
+    editMode,
+    saveShared,
+    isSavingShared,
+  ] = useUnit([
     $lorebook,
     lorebookChanged,
     lorebookCleared,
@@ -88,7 +135,10 @@ export function LorebookEditor({
     changeLorebook({ ...lorebook, data: updated });
   };
 
-  const updateEntry = (index: number, updater: (entry: LorebookEntry) => LorebookEntry) => {
+  const updateEntry = (
+    index: number,
+    updater: (entry: LorebookEntry) => LorebookEntry
+  ) => {
     updateLorebookData((data) => {
       const entries = [...data.entries];
       entries[index] = updater(entries[index] || createEmptyEntry());
@@ -98,19 +148,22 @@ export function LorebookEditor({
 
   const addEntry = () => {
     updateLorebookData((data) => {
-      const newEntry = createEmptyEntry();
-      newEntry.insertion_order = data.entries.length;
+      const newEntry = {
+        ...createEmptyEntry(),
+        insertion_order: data.entries.length,
+      };
       return { ...data, entries: [...data.entries, newEntry] };
     });
   };
 
   const deleteEntry = (index: number) => {
     updateLorebookData((data) => {
-      const entries = [...data.entries];
-      entries.splice(index, 1);
-      entries.forEach((entry, idx) => {
-        entry.insertion_order = idx;
-      });
+      const remaining = data.entries.filter((_, idx) => idx !== index);
+      const entries = remaining.map((entry, idx) =>
+        entry.insertion_order === idx
+          ? entry
+          : { ...entry, insertion_order: idx }
+      );
       return { ...data, entries };
     });
   };
@@ -129,13 +182,18 @@ export function LorebookEditor({
 
   const moveEntry = (index: number, direction: "up" | "down") => {
     updateLorebookData((data) => {
-      const entries = [...data.entries];
+      const entries = data.entries;
       const newIndex = direction === "up" ? index - 1 : index + 1;
       if (newIndex < 0 || newIndex >= entries.length) return data;
-      [entries[index], entries[newIndex]] = [entries[newIndex], entries[index]];
-      entries[index].insertion_order = index;
-      entries[newIndex].insertion_order = newIndex;
-      return { ...data, entries };
+
+      const a = entries[index];
+      const b = entries[newIndex];
+      if (!a || !b) return data;
+
+      const next = entries.slice();
+      next[index] = { ...b, insertion_order: index };
+      next[newIndex] = { ...a, insertion_order: newIndex };
+      return { ...data, entries: next };
     });
   };
 
@@ -158,7 +216,10 @@ export function LorebookEditor({
       <Paper p="md">
         <Stack gap="md">
           <Text size="sm" c="dimmed">
-            {t("cardDetails.lorebook.noLorebook", "No lorebook attached to this card.")}
+            {t(
+              "cardDetails.lorebook.noLorebook",
+              "No lorebook attached to this card."
+            )}
           </Text>
           <Group>
             <Button onClick={handleCreateNew} disabled={disabled}>
@@ -172,7 +233,11 @@ export function LorebookEditor({
 
   return (
     <Stack gap="md">
-      <LorebookPicker disabled={disabled} onCreateNew={handleCreateNew} onClear={clearLorebook} />
+      <LorebookPicker
+        disabled={disabled}
+        onCreateNew={handleCreateNew}
+        onClear={clearLorebook}
+      />
 
       <LorebookSettings
         disabled={disabled}
@@ -206,16 +271,30 @@ export function LorebookEditor({
           <Group>
             <Button
               onClick={() => saveShared()}
-              disabled={disabled || editMode !== "shared" || isSavingShared || !lorebook?.id}
+              disabled={
+                disabled ||
+                editMode !== "shared" ||
+                isSavingShared ||
+                !lorebook?.id
+              }
               loading={isSavingShared}
               variant="light"
             >
               {t("cardDetails.lorebook.save", "Save Lorebook")}
             </Button>
-            <Button variant="light" onClick={handleCreateNew} disabled={disabled}>
+            <Button
+              variant="light"
+              onClick={handleCreateNew}
+              disabled={disabled}
+            >
               {t("cardDetails.lorebook.createNew", "Create New")}
             </Button>
-            <Button variant="subtle" color="red" onClick={clearLorebook} disabled={disabled}>
+            <Button
+              variant="subtle"
+              color="red"
+              onClick={clearLorebook}
+              disabled={disabled}
+            >
               {t("cardDetails.lorebook.clear", "Clear")}
             </Button>
           </Group>
@@ -224,5 +303,3 @@ export function LorebookEditor({
     </Stack>
   );
 }
-
-

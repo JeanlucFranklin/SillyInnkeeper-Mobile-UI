@@ -1,10 +1,22 @@
 import { memo, useMemo } from "react";
-import { useUnit } from "effector-react";
+import { useStoreMap, useUnit } from "effector-react";
 import { useTranslation } from "react-i18next";
-import { ActionIcon, Button, Checkbox, Collapse, Group, Paper, Stack, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Checkbox,
+  Collapse,
+  Group,
+  Paper,
+  Stack,
+  Text,
+} from "@mantine/core";
 import type { LorebookEntry } from "@/shared/types/lorebooks";
 import { getStExt } from "@/shared/types/lorebooks/sillytavern";
-import { $lorebookExpanded, lorebookToggleEntryExpanded } from "../../../model.lorebook-editor";
+import {
+  $lorebookExpanded,
+  lorebookToggleEntryExpanded,
+} from "../../../model.lorebook-editor";
 import { LorebookEntryEditor } from "./LorebookEntryEditor";
 
 export const LorebookEntryCard = memo(function LorebookEntryCard({
@@ -12,23 +24,30 @@ export const LorebookEntryCard = memo(function LorebookEntryCard({
   index,
   totalEntries,
   disabled,
-  onUpdate,
-  onDelete,
-  onDuplicate,
-  onMove,
+  onUpdateEntry,
+  onDeleteEntry,
+  onDuplicateEntry,
+  onMoveEntry,
 }: {
   entry: LorebookEntry;
   index: number;
   totalEntries: number;
   disabled?: boolean;
-  onUpdate: (updater: (entry: LorebookEntry) => LorebookEntry) => void;
-  onDelete: () => void;
-  onDuplicate: () => void;
-  onMove: (dir: "up" | "down") => void;
+  onUpdateEntry: (
+    index: number,
+    updater: (entry: LorebookEntry) => LorebookEntry
+  ) => void;
+  onDeleteEntry: (index: number) => void;
+  onDuplicateEntry: (index: number) => void;
+  onMoveEntry: (index: number, dir: "up" | "down") => void;
 }) {
   const { t } = useTranslation();
-  const [expandedMap, toggleExpanded] = useUnit([$lorebookExpanded, lorebookToggleEntryExpanded]);
-  const expanded = Boolean(expandedMap[index]);
+  const toggleExpanded = useUnit(lorebookToggleEntryExpanded);
+  const expanded = useStoreMap({
+    store: $lorebookExpanded,
+    keys: [index],
+    fn: (map, [idx]) => Boolean(map[idx]),
+  });
 
   const st = useMemo(() => getStExt(entry).entry ?? {}, [entry]);
 
@@ -42,14 +61,19 @@ export const LorebookEntryCard = memo(function LorebookEntryCard({
           <Checkbox
             label={t("cardDetails.lorebook.enabled", "Enabled")}
             checked={entry.enabled}
-            onChange={(ev) => onUpdate((ent) => ({ ...ent, enabled: ev.currentTarget.checked }))}
+            onChange={(ev) =>
+              onUpdateEntry(index, (ent) => ({
+                ...ent,
+                enabled: ev.currentTarget.checked,
+              }))
+            }
             disabled={disabled}
           />
         </Group>
         <Group gap="xs">
           <ActionIcon
             variant="light"
-            onClick={() => onMove("up")}
+            onClick={() => onMoveEntry(index, "up")}
             disabled={disabled || index === 0}
             aria-label={t("cardDetails.lorebook.moveUp", "Move up")}
           >
@@ -69,7 +93,7 @@ export const LorebookEntryCard = memo(function LorebookEntryCard({
           </ActionIcon>
           <ActionIcon
             variant="light"
-            onClick={() => onMove("down")}
+            onClick={() => onMoveEntry(index, "down")}
             disabled={disabled || index === totalEntries - 1}
             aria-label={t("cardDetails.lorebook.moveDown", "Move down")}
           >
@@ -90,7 +114,7 @@ export const LorebookEntryCard = memo(function LorebookEntryCard({
           <ActionIcon
             variant="light"
             color="blue"
-            onClick={onDuplicate}
+            onClick={() => onDuplicateEntry(index)}
             disabled={disabled}
             aria-label={t("cardDetails.lorebook.duplicate", "Duplicate")}
           >
@@ -112,7 +136,7 @@ export const LorebookEntryCard = memo(function LorebookEntryCard({
           <ActionIcon
             variant="light"
             color="red"
-            onClick={onDelete}
+            onClick={() => onDeleteEntry(index)}
             disabled={disabled}
             aria-label={t("cardDetails.lorebook.delete", "Delete")}
           >
@@ -162,7 +186,9 @@ export const LorebookEntryCard = memo(function LorebookEntryCard({
             {t("cardDetails.lorebook.priority", "Priority")}
           </Text>
           <Text size="sm">
-            {typeof entry.priority === "number" ? String(entry.priority) : t("empty.dash")}
+            {typeof entry.priority === "number"
+              ? String(entry.priority)
+              : t("empty.dash")}
           </Text>
         </Stack>
         <Stack gap={2} w={90}>
@@ -170,18 +196,22 @@ export const LorebookEntryCard = memo(function LorebookEntryCard({
             {t("cardDetails.lorebook.trigger", "Trigger %")}
           </Text>
           <Text size="sm">
-            {typeof st.trigger_percent === "number" ? String(st.trigger_percent) : t("empty.dash")}
+            {typeof st.trigger_percent === "number"
+              ? String(st.trigger_percent)
+              : t("empty.dash")}
           </Text>
         </Stack>
       </Group>
 
       <Collapse in={expanded}>
-        <LorebookEntryEditor
-          entry={entry}
-          index={index}
-          disabled={disabled}
-          onUpdate={onUpdate}
-        />
+        {expanded ? (
+          <LorebookEntryEditor
+            entry={entry}
+            index={index}
+            disabled={disabled}
+            onUpdate={(updater) => onUpdateEntry(index, updater)}
+          />
+        ) : null}
       </Collapse>
 
       <Button
@@ -228,5 +258,3 @@ export const LorebookEntryCard = memo(function LorebookEntryCard({
     </Paper>
   );
 });
-
-

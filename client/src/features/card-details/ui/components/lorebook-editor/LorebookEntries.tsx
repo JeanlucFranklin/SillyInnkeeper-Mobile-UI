@@ -34,7 +34,10 @@ export function LorebookEntries({
   disabled?: boolean;
   entries: LorebookEntry[];
   onAdd: () => void;
-  onUpdateEntry: (index: number, updater: (entry: LorebookEntry) => LorebookEntry) => void;
+  onUpdateEntry: (
+    index: number,
+    updater: (entry: LorebookEntry) => LorebookEntry
+  ) => void;
   onDeleteEntry: (index: number) => void;
   onDuplicateEntry: (index: number) => void;
   onMoveEntry: (index: number, dir: "up" | "down") => void;
@@ -58,7 +61,12 @@ export function LorebookEntries({
       const keys = (entry.keys ?? []).join(",").toLowerCase();
       const content = (entry.content ?? "").toLowerCase();
       const idx = String(index + 1);
-      return title.includes(q) || keys.includes(q) || content.includes(q) || idx === q;
+      return (
+        title.includes(q) ||
+        keys.includes(q) ||
+        content.includes(q) ||
+        idx === q
+      );
     });
   }, [entries, search]);
 
@@ -86,7 +94,10 @@ export function LorebookEntries({
             {t("cardDetails.lorebook.entries", "Entries")} ({entries.length})
           </Text>
           <Text size="xs" c="dimmed">
-            {t("cardDetails.lorebook.entriesHint", "Search, reorder, and configure entries")}
+            {t(
+              "cardDetails.lorebook.entriesHint",
+              "Search, reorder, and configure entries"
+            )}
           </Text>
         </Stack>
         <Button onClick={onAdd} disabled={disabled} size="sm">
@@ -99,7 +110,10 @@ export function LorebookEntries({
           label={t("cardDetails.lorebook.searchEntries", "Search")}
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
-          placeholder={t("cardDetails.lorebook.searchEntriesPlaceholder", "Title, keys, content…")}
+          placeholder={t(
+            "cardDetails.lorebook.searchEntriesPlaceholder",
+            "Title, keys, content…"
+          )}
           disabled={disabled}
           style={{ flex: 1 }}
         />
@@ -119,7 +133,9 @@ export function LorebookEntries({
         <NumberInput
           label={t("cardDetails.lorebook.page", "Page")}
           value={paged.page}
-          onChange={(v) => setPage(typeof v === "number" && Number.isFinite(v) ? v : 1)}
+          onChange={(v) =>
+            setPage(typeof v === "number" && Number.isFinite(v) ? v : 1)
+          }
           min={1}
           max={paged.totalPages}
           disabled={disabled}
@@ -139,17 +155,26 @@ export function LorebookEntries({
           {t("cardDetails.lorebook.of", "of")} {paged.total}
         </Text>
         <Text size="xs" c="dimmed">
-          {t("cardDetails.lorebook.sortHint", "Tip: use the arrows to change order")}
+          {t(
+            "cardDetails.lorebook.sortHint",
+            "Tip: use the arrows to change order"
+          )}
         </Text>
       </Group>
 
       {entries.length === 0 ? (
         <Text size="sm" c="dimmed" ta="center" py="xl">
-          {t("cardDetails.lorebook.noEntries", "No entries yet. Add one to get started.")}
+          {t(
+            "cardDetails.lorebook.noEntries",
+            "No entries yet. Add one to get started."
+          )}
         </Text>
       ) : paged.total === 0 ? (
         <Text size="sm" c="dimmed" ta="center" py="xl">
-          {t("cardDetails.lorebook.noSearchResults", "No entries match your search.")}
+          {t(
+            "cardDetails.lorebook.noSearchResults",
+            "No entries match your search."
+          )}
         </Text>
       ) : (
         <Stack gap="md">
@@ -160,10 +185,10 @@ export function LorebookEntries({
               entry={entry}
               totalEntries={entries.length}
               disabled={disabled}
-              onUpdate={(updater) => onUpdateEntry(index, updater)}
-              onDelete={() => onDeleteEntry(index)}
-              onDuplicate={() => onDuplicateEntry(index)}
-              onMove={(dir) => onMoveEntry(index, dir)}
+              onUpdateEntry={onUpdateEntry}
+              onDeleteEntry={onDeleteEntry}
+              onDuplicateEntry={onDuplicateEntry}
+              onMoveEntry={onMoveEntry}
             />
           ))}
         </Stack>
@@ -171,5 +196,3 @@ export function LorebookEntries({
     </Paper>
   );
 }
-
-
