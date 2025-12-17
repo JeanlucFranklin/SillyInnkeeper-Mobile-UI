@@ -107,6 +107,7 @@ export function LorebookEditor({
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
+  const contentKey = openedId ?? "none";
 
   const [
     lorebook,
@@ -213,7 +214,7 @@ export function LorebookEditor({
 
   if (!lorebook) {
     return (
-      <Paper p="md">
+      <Paper key={contentKey} p="md">
         <Stack gap="md">
           <Text size="sm" c="dimmed">
             {t(
@@ -232,7 +233,7 @@ export function LorebookEditor({
   }
 
   return (
-    <Stack gap="md">
+    <Stack key={contentKey} gap="md">
       <LorebookPicker
         disabled={disabled}
         onCreateNew={handleCreateNew}

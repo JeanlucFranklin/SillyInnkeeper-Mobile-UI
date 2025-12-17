@@ -1,7 +1,19 @@
-import { Group, NumberInput, Select, Stack, Text, Textarea, Checkbox, TagsInput } from "@mantine/core";
+import {
+  Group,
+  NumberInput,
+  Select,
+  Stack,
+  Text,
+  Textarea,
+  Checkbox,
+} from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import type { LorebookEntry } from "@/shared/types/lorebooks";
-import { clampInt, getStExt, setStEntryExt } from "@/shared/types/lorebooks/sillytavern";
+import {
+  clampInt,
+  getStExt,
+  setStEntryExt,
+} from "@/shared/types/lorebooks/sillytavern";
 import { DeferredCommaListInput } from "./fields/DeferredCommaListInput";
 
 export function LorebookEntryEditor({
@@ -18,7 +30,9 @@ export function LorebookEntryEditor({
   const { t } = useTranslation();
   const st = getStExt(entry).entry ?? {};
 
-  const resetKeyBase = `${index}:${entry.insertion_order}:${entry.enabled ? 1 : 0}`;
+  const resetKeyBase = `${index}:${entry.insertion_order}:${
+    entry.enabled ? 1 : 0
+  }`;
 
   const triggers = Array.isArray(st.triggers) ? st.triggers : [];
   const additionalSources = Array.isArray(st.additional_matching_sources)
@@ -46,7 +60,10 @@ export function LorebookEntryEditor({
       {/* Keys: deferred parsing to allow commas (regex, \\,) */}
       <DeferredCommaListInput
         label={t("cardDetails.lorebook.keys", "Keys")}
-        placeholder={t("cardDetails.lorebook.keysPlaceholder", "Comma separated list")}
+        placeholder={t(
+          "cardDetails.lorebook.keysPlaceholder",
+          "Comma separated list"
+        )}
         disabled={disabled}
         values={entry.keys}
         onCommit={(keys) => onUpdate((ent) => ({ ...ent, keys }))}
@@ -67,7 +84,10 @@ export function LorebookEntryEditor({
         />
         <DeferredCommaListInput
           label={t("cardDetails.lorebook.secondaryKeys", "Secondary Keys")}
-          placeholder={t("cardDetails.lorebook.keysPlaceholder", "Comma separated list")}
+          placeholder={t(
+            "cardDetails.lorebook.keysPlaceholder",
+            "Comma separated list"
+          )}
           disabled={disabled || entry.use_regex}
           values={entry.secondary_keys ?? []}
           onCommit={(secondary) =>
@@ -76,14 +96,18 @@ export function LorebookEntryEditor({
               secondary_keys: secondary.length > 0 ? secondary : undefined,
             }))
           }
-          resetKey={`${resetKeyBase}:secondary:${(entry.secondary_keys ?? []).join("|")}`}
+          resetKey={`${resetKeyBase}:secondary:${(
+            entry.secondary_keys ?? []
+          ).join("|")}`}
         />
       </Group>
 
       <Textarea
         label={t("cardDetails.lorebook.content", "Content")}
         value={entry.content}
-        onChange={(ev) => onUpdate((ent) => ({ ...ent, content: ev.currentTarget.value }))}
+        onChange={(ev) =>
+          onUpdate((ent) => ({ ...ent, content: ev.currentTarget.value }))
+        }
         disabled={disabled}
         minRows={4}
       />
@@ -95,7 +119,8 @@ export function LorebookEntryEditor({
           onChange={(value) =>
             onUpdate((ent) => ({
               ...ent,
-              insertion_order: typeof value === "number" && Number.isFinite(value) ? value : 0,
+              insertion_order:
+                typeof value === "number" && Number.isFinite(value) ? value : 0,
             }))
           }
           disabled={disabled}
@@ -107,7 +132,10 @@ export function LorebookEntryEditor({
           onChange={(value) =>
             onUpdate((ent) => ({
               ...ent,
-              priority: typeof value === "number" && Number.isFinite(value) ? value : undefined,
+              priority:
+                typeof value === "number" && Number.isFinite(value)
+                  ? value
+                  : undefined,
             }))
           }
           disabled={disabled}
@@ -122,13 +150,21 @@ export function LorebookEntryEditor({
           onUpdate((ent) => ({
             ...ent,
             position:
-              value === "before_char" || value === "after_char" ? value : undefined,
+              value === "before_char" || value === "after_char"
+                ? value
+                : undefined,
           }))
         }
         data={[
           { value: "", label: t("cardDetails.lorebook.optional", "Optional") },
-          { value: "before_char", label: t("cardDetails.lorebook.posBeforeChar", "Before Char Defs") },
-          { value: "after_char", label: t("cardDetails.lorebook.posAfterChar", "After Char Defs") },
+          {
+            value: "before_char",
+            label: t("cardDetails.lorebook.posBeforeChar", "Before Char Defs"),
+          },
+          {
+            value: "after_char",
+            label: t("cardDetails.lorebook.posAfterChar", "After Char Defs"),
+          },
         ]}
         disabled={disabled}
       />
@@ -137,7 +173,9 @@ export function LorebookEntryEditor({
         <Checkbox
           label={t("cardDetails.lorebook.useRegex", "Use Regex")}
           checked={entry.use_regex}
-          onChange={(ev) => onUpdate((ent) => ({ ...ent, use_regex: ev.currentTarget.checked }))}
+          onChange={(ev) =>
+            onUpdate((ent) => ({ ...ent, use_regex: ev.currentTarget.checked }))
+          }
           disabled={disabled}
         />
         <Checkbox
@@ -171,21 +209,36 @@ export function LorebookEntryEditor({
 
       <DeferredCommaListInput
         label={t("cardDetails.lorebook.optionalFilter", "Optional Filter")}
-        placeholder={t("cardDetails.lorebook.keysPlaceholder", "Comma separated list")}
+        placeholder={t(
+          "cardDetails.lorebook.keysPlaceholder",
+          "Comma separated list"
+        )}
         disabled={disabled || entry.use_regex}
         values={Array.isArray(st.optional_filter) ? st.optional_filter : []}
         onCommit={(list) =>
-          onUpdate((ent) => setStEntryExt(ent, { optional_filter: list.length > 0 ? list : undefined }))
+          onUpdate((ent) =>
+            setStEntryExt(ent, {
+              optional_filter: list.length > 0 ? list : undefined,
+            })
+          )
         }
-        resetKey={`${resetKeyBase}:opt:${(Array.isArray(st.optional_filter) ? st.optional_filter : []).join("|")}`}
+        resetKey={`${resetKeyBase}:opt:${(Array.isArray(st.optional_filter)
+          ? st.optional_filter
+          : []
+        ).join("|")}`}
       />
 
       <Select
         label={t("cardDetails.lorebook.optionalLogic", "Logic")}
-        value={typeof st.optional_logic === "string" ? st.optional_logic : "AND_ANY"}
+        value={
+          typeof st.optional_logic === "string" ? st.optional_logic : "AND_ANY"
+        }
         onChange={(value) => {
           const v =
-            value === "AND_ANY" || value === "AND_ALL" || value === "NOT_ANY" || value === "NOT_ALL"
+            value === "AND_ANY" ||
+            value === "AND_ALL" ||
+            value === "NOT_ANY" ||
+            value === "NOT_ALL"
               ? value
               : "AND_ANY";
           onUpdate((ent) => setStEntryExt(ent, { optional_logic: v }));
@@ -204,7 +257,11 @@ export function LorebookEntryEditor({
           label={t("cardDetails.lorebook.wholeWords", "Whole Words")}
           checked={Boolean(st.match_whole_words)}
           onChange={(ev) =>
-            onUpdate((ent) => setStEntryExt(ent, { match_whole_words: ev.currentTarget.checked || undefined }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                match_whole_words: ev.currentTarget.checked || undefined,
+              })
+            )
           }
           disabled={disabled}
         />
@@ -212,15 +269,29 @@ export function LorebookEntryEditor({
           label={t("cardDetails.lorebook.groupScoring", "Group Scoring")}
           checked={Boolean(st.group_scoring)}
           onChange={(ev) =>
-            onUpdate((ent) => setStEntryExt(ent, { group_scoring: ev.currentTarget.checked || undefined }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                group_scoring: ev.currentTarget.checked || undefined,
+              })
+            )
           }
           disabled={disabled}
         />
         <NumberInput
           label={t("cardDetails.lorebook.trigger", "Trigger %")}
-          value={typeof st.trigger_percent === "number" ? st.trigger_percent : 100}
+          value={
+            typeof st.trigger_percent === "number" ? st.trigger_percent : 100
+          }
           onChange={(value) =>
-            onUpdate((ent) => setStEntryExt(ent, { trigger_percent: clampInt(value, { min: 0, max: 100, fallback: 100 }) }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                trigger_percent: clampInt(value, {
+                  min: 0,
+                  max: 100,
+                  fallback: 100,
+                }),
+              })
+            )
           }
           disabled={disabled}
           min={0}
@@ -232,25 +303,42 @@ export function LorebookEntryEditor({
         <Checkbox
           label={t("cardDetails.lorebook.nonRecursable", "Non-recursable")}
           checked={Boolean(st.non_recursable)}
-          onChange={(ev) => onUpdate((ent) => setStEntryExt(ent, { non_recursable: ev.currentTarget.checked || undefined }))}
-          disabled={disabled}
-        />
-        <Checkbox
-          label={t("cardDetails.lorebook.preventFurtherRecursion", "Prevent further recursion")}
-          checked={Boolean(st.prevent_further_recursion)}
           onChange={(ev) =>
             onUpdate((ent) =>
-              setStEntryExt(ent, { prevent_further_recursion: ev.currentTarget.checked || undefined })
+              setStEntryExt(ent, {
+                non_recursable: ev.currentTarget.checked || undefined,
+              })
             )
           }
           disabled={disabled}
         />
         <Checkbox
-          label={t("cardDetails.lorebook.delayUntilRecursion", "Delay until recursion")}
+          label={t(
+            "cardDetails.lorebook.preventFurtherRecursion",
+            "Prevent further recursion"
+          )}
+          checked={Boolean(st.prevent_further_recursion)}
+          onChange={(ev) =>
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                prevent_further_recursion:
+                  ev.currentTarget.checked || undefined,
+              })
+            )
+          }
+          disabled={disabled}
+        />
+        <Checkbox
+          label={t(
+            "cardDetails.lorebook.delayUntilRecursion",
+            "Delay until recursion"
+          )}
           checked={Boolean(st.delay_until_recursion)}
           onChange={(ev) =>
             onUpdate((ent) =>
-              setStEntryExt(ent, { delay_until_recursion: ev.currentTarget.checked || undefined })
+              setStEntryExt(ent, {
+                delay_until_recursion: ev.currentTarget.checked || undefined,
+              })
             )
           }
           disabled={disabled}
@@ -259,16 +347,28 @@ export function LorebookEntryEditor({
           label={t("cardDetails.lorebook.ignoreBudget", "Ignore budget")}
           checked={Boolean(st.ignore_budget)}
           onChange={(ev) =>
-            onUpdate((ent) => setStEntryExt(ent, { ignore_budget: ev.currentTarget.checked || undefined }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                ignore_budget: ev.currentTarget.checked || undefined,
+              })
+            )
           }
           disabled={disabled}
         />
         <NumberInput
           label={t("cardDetails.lorebook.recursionLevel", "Recursion Level")}
-          value={typeof st.recursion_level === "number" ? st.recursion_level : 0}
+          value={
+            typeof st.recursion_level === "number" ? st.recursion_level : 0
+          }
           onChange={(value) =>
             onUpdate((ent) =>
-              setStEntryExt(ent, { recursion_level: clampInt(value, { min: 0, max: 1000, fallback: 0 }) })
+              setStEntryExt(ent, {
+                recursion_level: clampInt(value, {
+                  min: 0,
+                  max: 1000,
+                  fallback: 0,
+                }),
+              })
             )
           }
           disabled={disabled || !st.delay_until_recursion}
@@ -278,15 +378,23 @@ export function LorebookEntryEditor({
 
       <DeferredCommaListInput
         label={t("cardDetails.lorebook.inclusionGroup", "Inclusion Group")}
-        placeholder={t("cardDetails.lorebook.keysPlaceholder", "Comma separated list")}
+        placeholder={t(
+          "cardDetails.lorebook.keysPlaceholder",
+          "Comma separated list"
+        )}
         disabled={disabled}
         values={Array.isArray(st.inclusion_groups) ? st.inclusion_groups : []}
         onCommit={(list) =>
           onUpdate((ent) =>
-            setStEntryExt(ent, { inclusion_groups: list.length > 0 ? list : undefined })
+            setStEntryExt(ent, {
+              inclusion_groups: list.length > 0 ? list : undefined,
+            })
           )
         }
-        resetKey={`${resetKeyBase}:groups:${(Array.isArray(st.inclusion_groups) ? st.inclusion_groups : []).join("|")}`}
+        resetKey={`${resetKeyBase}:groups:${(Array.isArray(st.inclusion_groups)
+          ? st.inclusion_groups
+          : []
+        ).join("|")}`}
       />
 
       <Group grow>
@@ -294,16 +402,31 @@ export function LorebookEntryEditor({
           label={t("cardDetails.lorebook.groupWeight", "Group Weight")}
           value={typeof st.group_weight === "number" ? st.group_weight : 100}
           onChange={(value) =>
-            onUpdate((ent) => setStEntryExt(ent, { group_weight: clampInt(value, { min: 0, max: 100000, fallback: 100 }) }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                group_weight: clampInt(value, {
+                  min: 0,
+                  max: 100000,
+                  fallback: 100,
+                }),
+              })
+            )
           }
           disabled={disabled}
           min={0}
         />
         <Checkbox
-          label={t("cardDetails.lorebook.prioritizeInclusion", "Prioritize Inclusion")}
+          label={t(
+            "cardDetails.lorebook.prioritizeInclusion",
+            "Prioritize Inclusion"
+          )}
           checked={Boolean(st.prioritize_inclusion)}
           onChange={(ev) =>
-            onUpdate((ent) => setStEntryExt(ent, { prioritize_inclusion: ev.currentTarget.checked || undefined }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                prioritize_inclusion: ev.currentTarget.checked || undefined,
+              })
+            )
           }
           disabled={disabled}
         />
@@ -314,7 +437,11 @@ export function LorebookEntryEditor({
           label={t("cardDetails.lorebook.sticky", "Sticky")}
           value={typeof st.sticky === "number" ? st.sticky : 0}
           onChange={(value) =>
-            onUpdate((ent) => setStEntryExt(ent, { sticky: clampInt(value, { min: 0, max: 100000, fallback: 0 }) }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                sticky: clampInt(value, { min: 0, max: 100000, fallback: 0 }),
+              })
+            )
           }
           disabled={disabled}
           min={0}
@@ -323,7 +450,11 @@ export function LorebookEntryEditor({
           label={t("cardDetails.lorebook.cooldown", "Cooldown")}
           value={typeof st.cooldown === "number" ? st.cooldown : 0}
           onChange={(value) =>
-            onUpdate((ent) => setStEntryExt(ent, { cooldown: clampInt(value, { min: 0, max: 100000, fallback: 0 }) }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                cooldown: clampInt(value, { min: 0, max: 100000, fallback: 0 }),
+              })
+            )
           }
           disabled={disabled}
           min={0}
@@ -332,7 +463,11 @@ export function LorebookEntryEditor({
           label={t("cardDetails.lorebook.delay", "Delay")}
           value={typeof st.delay === "number" ? st.delay : 0}
           onChange={(value) =>
-            onUpdate((ent) => setStEntryExt(ent, { delay: clampInt(value, { min: 0, max: 100000, fallback: 0 }) }))
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                delay: clampInt(value, { min: 0, max: 100000, fallback: 0 }),
+              })
+            )
           }
           disabled={disabled}
           min={0}
@@ -343,7 +478,11 @@ export function LorebookEntryEditor({
         label={t("cardDetails.lorebook.automationId", "Automation ID")}
         value={typeof st.automation_id === "string" ? st.automation_id : ""}
         onChange={(ev) =>
-          onUpdate((ent) => setStEntryExt(ent, { automation_id: ev.currentTarget.value.trim() || undefined }))
+          onUpdate((ent) =>
+            setStEntryExt(ent, {
+              automation_id: ev.currentTarget.value.trim() || undefined,
+            })
+          )
         }
         disabled={disabled}
         minRows={1}
@@ -359,7 +498,9 @@ export function LorebookEntryEditor({
             const next = new Set(triggers);
             if (ev.currentTarget.checked) next.add("normal");
             else next.delete("normal");
-            onUpdate((ent) => setStEntryExt(ent, { triggers: Array.from(next) as any }));
+            onUpdate((ent) =>
+              setStEntryExt(ent, { triggers: Array.from(next) as any })
+            );
           }}
           disabled={disabled}
         />
@@ -370,7 +511,9 @@ export function LorebookEntryEditor({
             const next = new Set(triggers);
             if (ev.currentTarget.checked) next.add("continue");
             else next.delete("continue");
-            onUpdate((ent) => setStEntryExt(ent, { triggers: Array.from(next) as any }));
+            onUpdate((ent) =>
+              setStEntryExt(ent, { triggers: Array.from(next) as any })
+            );
           }}
           disabled={disabled}
         />
@@ -381,7 +524,9 @@ export function LorebookEntryEditor({
             const next = new Set(triggers);
             if (ev.currentTarget.checked) next.add("swipe");
             else next.delete("swipe");
-            onUpdate((ent) => setStEntryExt(ent, { triggers: Array.from(next) as any }));
+            onUpdate((ent) =>
+              setStEntryExt(ent, { triggers: Array.from(next) as any })
+            );
           }}
           disabled={disabled}
         />
@@ -392,7 +537,9 @@ export function LorebookEntryEditor({
             const next = new Set(triggers);
             if (ev.currentTarget.checked) next.add("quiet");
             else next.delete("quiet");
-            onUpdate((ent) => setStEntryExt(ent, { triggers: Array.from(next) as any }));
+            onUpdate((ent) =>
+              setStEntryExt(ent, { triggers: Array.from(next) as any })
+            );
           }}
           disabled={disabled}
         />
@@ -400,13 +547,20 @@ export function LorebookEntryEditor({
 
       <Group grow>
         <Checkbox
-          label={t("cardDetails.lorebook.matchSourceCharDesc", "Character Description")}
+          label={t(
+            "cardDetails.lorebook.matchSourceCharDesc",
+            "Character Description"
+          )}
           checked={additionalSources.includes("character_description")}
           onChange={(ev) => {
             const next = new Set(additionalSources);
             if (ev.currentTarget.checked) next.add("character_description");
             else next.delete("character_description");
-            onUpdate((ent) => setStEntryExt(ent, { additional_matching_sources: Array.from(next) as any }));
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                additional_matching_sources: Array.from(next) as any,
+              })
+            );
           }}
           disabled={disabled}
         />
@@ -417,18 +571,29 @@ export function LorebookEntryEditor({
             const next = new Set(additionalSources);
             if (ev.currentTarget.checked) next.add("scenario");
             else next.delete("scenario");
-            onUpdate((ent) => setStEntryExt(ent, { additional_matching_sources: Array.from(next) as any }));
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                additional_matching_sources: Array.from(next) as any,
+              })
+            );
           }}
           disabled={disabled}
         />
         <Checkbox
-          label={t("cardDetails.lorebook.matchSourceCreatorsNotes", "Creator's Notes")}
+          label={t(
+            "cardDetails.lorebook.matchSourceCreatorsNotes",
+            "Creator's Notes"
+          )}
           checked={additionalSources.includes("creators_notes")}
           onChange={(ev) => {
             const next = new Set(additionalSources);
             if (ev.currentTarget.checked) next.add("creators_notes");
             else next.delete("creators_notes");
-            onUpdate((ent) => setStEntryExt(ent, { additional_matching_sources: Array.from(next) as any }));
+            onUpdate((ent) =>
+              setStEntryExt(ent, {
+                additional_matching_sources: Array.from(next) as any,
+              })
+            );
           }}
           disabled={disabled}
         />
@@ -450,5 +615,3 @@ export function LorebookEntryEditor({
     </Stack>
   );
 }
-
-
