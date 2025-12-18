@@ -232,11 +232,16 @@ const en = {
     unsavedChangesHint:
       'You have unsaved changes. Click "Save", otherwise changes will be lost when closing.',
     lorebook: {
+      controls: "Lorebook",
       save: "Save Lorebook",
       saveHint:
         "Changes are saved with the card. Use the main “Save” button in Actions.",
       saveHintShared:
         "In Shared mode, use “Save Lorebook” to persist changes to the lorebooks database.",
+      saveHintShort:
+        "Copy mode: changes are saved with the card (use main Save).",
+      saveHintSharedShort:
+        "Shared mode: use “Save Lorebook” to persist to database.",
       saved: "Lorebook saved successfully",
       created: "Lorebook created successfully",
       saveFailed: "Failed to save lorebook",
@@ -253,6 +258,7 @@ const en = {
       recursiveScanning: "Recursive Scanning",
       entries: "Entries",
       addEntry: "Add Entry",
+      collapseAll: "Collapse all",
       noEntries: "No entries yet. Add one to get started.",
       entry: "Entry",
       enabled: "Enabled",
@@ -265,7 +271,8 @@ const en = {
       keys: "Keys",
       keysPlaceholder: "Comma separated list",
       content: "Content",
-      contentPlaceholder: "What this keyword should mean to the AI, sent verbatim",
+      contentPlaceholder:
+        "What this keyword should mean to the AI, sent verbatim",
       insertionOrder: "Insertion Order",
       priority: "Priority",
       useRegex: "Use Regex",
@@ -302,6 +309,18 @@ const en = {
       selective: "Selective",
 
       stSection: "SillyTavern fields",
+      advanced: "Advanced",
+      advancedHint: "Rare SillyTavern-specific options",
+      sectionOptionalFilter: "Optional Filter",
+      sectionMatching: "Matching",
+      sectionRecursion: "Recursion",
+      sectionInclusion: "Inclusion / groups",
+      sectionTiming: "Timing",
+      sectionTriggers: "Triggers",
+      sectionAdditionalSources: "Additional matching sources",
+      sectionAutomation: "Automation",
+      triggers: "Triggers",
+      additionalMatchingSources: "Additional Matching Sources",
       optionalFilter: "Optional Filter",
       optionalLogic: "Logic",
       wholeWords: "Whole Words",
@@ -319,9 +338,14 @@ const en = {
       triggerContinue: "Continue",
       triggerSwipe: "Swipe",
       triggerQuiet: "Quiet",
+      triggerImpersonate: "Impersonate",
+      triggerRegenerate: "Regenerate",
 
       matchSourceCharDesc: "Character Description",
+      matchSourceCharPersonality: "Character Personality",
       matchSourceScenario: "Scenario",
+      matchSourcePersonaDesc: "Persona Description",
+      matchSourceCharNote: "Character Note",
       matchSourceCreatorsNotes: "Creator's Notes",
 
       nonRecursable: "Non-recursable",

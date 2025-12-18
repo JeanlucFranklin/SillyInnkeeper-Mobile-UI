@@ -16,6 +16,7 @@ import {
   $lorebookEntrySearch,
   $lorebookPage,
   $lorebookPageSize,
+  lorebookCollapseAll,
   lorebookEntrySearchChanged,
   lorebookPageChanged,
   lorebookPageSizeChanged,
@@ -43,14 +44,16 @@ export function LorebookEntries({
   onMoveEntry: (index: number, dir: "up" | "down") => void;
 }) {
   const { t } = useTranslation();
-  const [search, setSearch, page, setPage, pageSize, setPageSize] = useUnit([
-    $lorebookEntrySearch,
-    lorebookEntrySearchChanged,
-    $lorebookPage,
-    lorebookPageChanged,
-    $lorebookPageSize,
-    lorebookPageSizeChanged,
-  ]);
+  const [search, setSearch, page, setPage, pageSize, setPageSize, collapseAll] =
+    useUnit([
+      $lorebookEntrySearch,
+      lorebookEntrySearchChanged,
+      $lorebookPage,
+      lorebookPageChanged,
+      $lorebookPageSize,
+      lorebookPageSizeChanged,
+      lorebookCollapseAll,
+    ]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -87,80 +90,82 @@ export function LorebookEntries({
   }, [filtered, page, pageSize]);
 
   return (
-    <Paper p="md">
-      <Group justify="space-between" mb="md" align="flex-end">
-        <Stack gap={4}>
-          <Text fw={600}>
-            {t("cardDetails.lorebook.entries", "Entries")} ({entries.length})
-          </Text>
-          <Text size="xs" c="dimmed">
-            {t(
-              "cardDetails.lorebook.entriesHint",
-              "Search, reorder, and configure entries"
+    <Paper p="sm">
+      <Group
+        justify="space-between"
+        mb="xs"
+        wrap="wrap"
+        gap="xs"
+        align="center"
+      >
+        <Text size="sm" fw={600}>
+          {t("cardDetails.lorebook.entries", "Entries")} ({entries.length})
+        </Text>
+
+        <Group
+          gap="xs"
+          wrap="wrap"
+          style={{ flex: 1, justifyContent: "flex-end" }}
+        >
+          <TextInput
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            placeholder={t(
+              "cardDetails.lorebook.searchEntriesPlaceholder",
+              "Title, keys, content…"
             )}
-          </Text>
-        </Stack>
-        <Button onClick={onAdd} disabled={disabled} size="sm">
-          {t("cardDetails.lorebook.addEntry", "Add Entry")}
-        </Button>
+            disabled={disabled}
+            size="xs"
+            style={{ flex: 1, minWidth: 220 }}
+          />
+          <Select
+            value={String(pageSize)}
+            onChange={(v) => setPageSize(Number(v ?? 25))}
+            data={[
+              { value: "10", label: "10" },
+              { value: "25", label: "25" },
+              { value: "50", label: "50" },
+              { value: "100", label: "100" },
+            ]}
+            disabled={disabled}
+            size="xs"
+            w={96}
+          />
+          <NumberInput
+            value={paged.page}
+            onChange={(v) =>
+              setPage(typeof v === "number" && Number.isFinite(v) ? v : 1)
+            }
+            min={1}
+            max={paged.totalPages}
+            disabled={disabled}
+            size="xs"
+            w={96}
+          />
+          <Button onClick={onAdd} disabled={disabled} size="xs">
+            {t("cardDetails.lorebook.addEntry", "Add Entry")}
+          </Button>
+          <Button
+            variant="subtle"
+            onClick={() => collapseAll()}
+            disabled={disabled}
+            size="xs"
+          >
+            {t("cardDetails.lorebook.collapseAll", "Collapse all")}
+          </Button>
+        </Group>
       </Group>
 
-      <Group mb="md" align="flex-end">
-        <TextInput
-          label={t("cardDetails.lorebook.searchEntries", "Search")}
-          value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
-          placeholder={t(
-            "cardDetails.lorebook.searchEntriesPlaceholder",
-            "Title, keys, content…"
-          )}
-          disabled={disabled}
-          style={{ flex: 1 }}
-        />
-        <Select
-          label={t("cardDetails.lorebook.pageSize", "Per page")}
-          value={String(pageSize)}
-          onChange={(v) => setPageSize(Number(v ?? 25))}
-          data={[
-            { value: "10", label: "10" },
-            { value: "25", label: "25" },
-            { value: "50", label: "50" },
-            { value: "100", label: "100" },
-          ]}
-          disabled={disabled}
-          w={120}
-        />
-        <NumberInput
-          label={t("cardDetails.lorebook.page", "Page")}
-          value={paged.page}
-          onChange={(v) =>
-            setPage(typeof v === "number" && Number.isFinite(v) ? v : 1)
-          }
-          min={1}
-          max={paged.totalPages}
-          disabled={disabled}
-          w={120}
-        />
-      </Group>
-
-      <Group justify="space-between" mb="xs">
-        <Text size="xs" c="dimmed">
-          {t("cardDetails.lorebook.showing", "Showing")}{" "}
-          {paged.total === 0
-            ? "0"
-            : `${(paged.page - 1) * paged.pageSize + 1}-${Math.min(
-                paged.page * paged.pageSize,
-                paged.total
-              )}`}{" "}
-          {t("cardDetails.lorebook.of", "of")} {paged.total}
-        </Text>
-        <Text size="xs" c="dimmed">
-          {t(
-            "cardDetails.lorebook.sortHint",
-            "Tip: use the arrows to change order"
-          )}
-        </Text>
-      </Group>
+      <Text size="xs" c="dimmed" mb="xs">
+        {t("cardDetails.lorebook.showing", "Showing")}{" "}
+        {paged.total === 0
+          ? "0"
+          : `${(paged.page - 1) * paged.pageSize + 1}-${Math.min(
+              paged.page * paged.pageSize,
+              paged.total
+            )}`}{" "}
+        {t("cardDetails.lorebook.of", "of")} {paged.total}
+      </Text>
 
       {entries.length === 0 ? (
         <Text size="sm" c="dimmed" ta="center" py="xl">
@@ -177,7 +182,7 @@ export function LorebookEntries({
           )}
         </Text>
       ) : (
-        <Stack gap="md">
+        <Stack gap="xs">
           {paged.items.map(({ entry, index }) => (
             <LorebookEntryCard
               key={index}

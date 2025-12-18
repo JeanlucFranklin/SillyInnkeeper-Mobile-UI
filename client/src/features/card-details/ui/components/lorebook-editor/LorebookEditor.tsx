@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useUnit } from "effector-react";
 import { useTranslation } from "react-i18next";
-import { Button, Group, Paper, Stack, Text } from "@mantine/core";
+import { Accordion, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import type {
   Lorebook,
   LorebookDetails,
@@ -12,11 +12,6 @@ import {
   lorebookChanged,
   lorebookCleared,
 } from "../../../model.form";
-import {
-  $isSavingSharedLorebook,
-  $lorebookEditMode,
-  saveLorebookSharedClicked,
-} from "../../../model.lorebook-editor";
 import { LorebookPicker } from "./LorebookPicker";
 import { LorebookEntries } from "./LorebookEntries";
 import { LorebookSettings } from "./LorebookSettings";
@@ -109,20 +104,10 @@ export function LorebookEditor({
   const { t } = useTranslation();
   const contentKey = openedId ?? "none";
 
-  const [
-    lorebook,
-    changeLorebook,
-    clearLorebook,
-    editMode,
-    saveShared,
-    isSavingShared,
-  ] = useUnit([
+  const [lorebook, changeLorebook, clearLorebook] = useUnit([
     $lorebook,
     lorebookChanged,
     lorebookCleared,
-    $lorebookEditMode,
-    saveLorebookSharedClicked,
-    $isSavingSharedLorebook,
   ]);
 
   const lorebookData = useMemo(() => {
@@ -214,8 +199,8 @@ export function LorebookEditor({
 
   if (!lorebook) {
     return (
-      <Paper key={contentKey} p="md">
-        <Stack gap="md">
+      <Paper key={contentKey} p="sm">
+        <Stack gap="sm">
           <Text size="sm" c="dimmed">
             {t(
               "cardDetails.lorebook.noLorebook",
@@ -233,18 +218,36 @@ export function LorebookEditor({
   }
 
   return (
-    <Stack key={contentKey} gap="md">
-      <LorebookPicker
-        disabled={disabled}
-        onCreateNew={handleCreateNew}
-        onClear={clearLorebook}
-      />
+    <Stack key={contentKey} gap="sm">
+      <Accordion multiple defaultValue={[]} variant="contained">
+        <Accordion.Item value="lorebook">
+          <Accordion.Control>
+            {t("cardDetails.lorebook.controls", "Lorebook")}
+          </Accordion.Control>
+          <Accordion.Panel>
+            <LorebookPicker
+              disabled={disabled}
+              onCreateNew={handleCreateNew}
+              onClear={clearLorebook}
+              variant="panel"
+            />
+          </Accordion.Panel>
+        </Accordion.Item>
 
-      <LorebookSettings
-        disabled={disabled}
-        data={lorebookData}
-        onChange={updateLorebookData}
-      />
+        <Accordion.Item value="settings">
+          <Accordion.Control>
+            {t("cardDetails.lorebook.settings", "Lorebook Settings")}
+          </Accordion.Control>
+          <Accordion.Panel>
+            <LorebookSettings
+              disabled={disabled}
+              data={lorebookData}
+              onChange={updateLorebookData}
+              variant="panel"
+            />
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
 
       <LorebookEntries
         disabled={disabled}
@@ -255,52 +258,6 @@ export function LorebookEditor({
         onDuplicateEntry={duplicateEntry}
         onMoveEntry={moveEntry}
       />
-
-      <Paper p="md">
-        <Stack gap="xs">
-          <Text size="sm" c="dimmed">
-            {editMode === "shared"
-              ? t(
-                  "cardDetails.lorebook.saveHintShared",
-                  "In Shared mode, use “Save Lorebook” to persist to the lorebooks database."
-                )
-              : t(
-                  "cardDetails.lorebook.saveHint",
-                  "Changes are saved with the card. Use the main “Save” button in Actions."
-                )}
-          </Text>
-          <Group>
-            <Button
-              onClick={() => saveShared()}
-              disabled={
-                disabled ||
-                editMode !== "shared" ||
-                isSavingShared ||
-                !lorebook?.id
-              }
-              loading={isSavingShared}
-              variant="light"
-            >
-              {t("cardDetails.lorebook.save", "Save Lorebook")}
-            </Button>
-            <Button
-              variant="light"
-              onClick={handleCreateNew}
-              disabled={disabled}
-            >
-              {t("cardDetails.lorebook.createNew", "Create New")}
-            </Button>
-            <Button
-              variant="subtle"
-              color="red"
-              onClick={clearLorebook}
-              disabled={disabled}
-            >
-              {t("cardDetails.lorebook.clear", "Clear")}
-            </Button>
-          </Group>
-        </Stack>
-      </Paper>
     </Stack>
   );
 }

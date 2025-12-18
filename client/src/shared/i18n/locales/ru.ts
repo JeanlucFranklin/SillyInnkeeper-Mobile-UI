@@ -235,11 +235,16 @@ const ru = {
     unsavedChangesHint:
       "Есть несохранённые изменения. Нажмите «Сохранить», иначе они будут потеряны при закрытии.",
     lorebook: {
+      controls: "Лорбук",
       save: "Сохранить лорбук",
       saveHint:
         "Изменения сохраняются вместе с карточкой. Используйте основную кнопку «Сохранить» в блоке «Действия».",
       saveHintShared:
         "В режиме «Общий» используйте «Сохранить лорбук», чтобы сохранить изменения в базе лорбуков.",
+      saveHintShort:
+        "Режим «Копия»: изменения сохраняются с карточкой (основное «Сохранить»).",
+      saveHintSharedShort:
+        "Режим «Общий»: используйте «Сохранить лорбук», чтобы записать в базу.",
       saved: "Лорбук успешно сохранён",
       created: "Лорбук успешно создан",
       saveFailed: "Не удалось сохранить лорбук",
@@ -256,6 +261,7 @@ const ru = {
       recursiveScanning: "Рекурсивное сканирование",
       entries: "Записи",
       addEntry: "Добавить запись",
+      collapseAll: "Свернуть все",
       noEntries: "Записей пока нет. Добавьте одну для начала.",
       entry: "Запись",
       enabled: "Включено",
@@ -268,7 +274,8 @@ const ru = {
       keys: "Ключи",
       keysPlaceholder: "Список через запятую",
       content: "Содержимое",
-      contentPlaceholder: "Что это ключевое слово должно означать для ИИ, отправляется дословно",
+      contentPlaceholder:
+        "Что это ключевое слово должно означать для ИИ, отправляется дословно",
       insertionOrder: "Порядок вставки",
       priority: "Приоритет",
       useRegex: "Использовать регулярные выражения",
@@ -305,6 +312,18 @@ const ru = {
       selective: "Выборочная (Selective)",
 
       stSection: "Поля SillyTavern",
+      advanced: "Дополнительно",
+      advancedHint: "Редкие настройки SillyTavern",
+      sectionOptionalFilter: "Доп. фильтр",
+      sectionMatching: "Сопоставление",
+      sectionRecursion: "Рекурсия",
+      sectionInclusion: "Группы включения",
+      sectionTiming: "Тайминги",
+      sectionTriggers: "Триггеры",
+      sectionAdditionalSources: "Доп. источники",
+      sectionAutomation: "Автоматизация",
+      triggers: "Триггеры",
+      additionalMatchingSources: "Дополнительные источники сопоставления",
       optionalFilter: "Доп. фильтр (Optional Filter)",
       optionalLogic: "Логика",
       wholeWords: "Целые слова (Whole Words)",
@@ -322,9 +341,14 @@ const ru = {
       triggerContinue: "Continue",
       triggerSwipe: "Swipe",
       triggerQuiet: "Quiet",
+      triggerImpersonate: "Impersonate",
+      triggerRegenerate: "Regenerate",
 
       matchSourceCharDesc: "Описание персонажа",
+      matchSourceCharPersonality: "Личность персонажа",
       matchSourceScenario: "Сценарий",
+      matchSourcePersonaDesc: "Описание персоны",
+      matchSourceCharNote: "Заметка персонажа",
       matchSourceCreatorsNotes: "Заметки автора",
 
       nonRecursable: "Non-recursable",
