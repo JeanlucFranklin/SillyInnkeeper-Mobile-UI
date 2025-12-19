@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useUnit } from "effector-react";
 import { useTranslation } from "react-i18next";
-import { Accordion, Button, Group, Paper, Stack, Text } from "@mantine/core";
+import { Accordion, Alert, List, Spoiler, Stack, Text } from "@mantine/core";
 import type {
   Lorebook,
   LorebookDetails,
@@ -109,6 +109,7 @@ export function LorebookEditor({
     lorebookChanged,
     lorebookCleared,
   ]);
+  const isLorebookAttached = Boolean(lorebook);
 
   const lorebookData = useMemo(() => {
     if (!lorebook?.data) return ensureLorebookStructure(null);
@@ -197,29 +198,9 @@ export function LorebookEditor({
     changeLorebook(emptyLorebook);
   };
 
-  if (!lorebook) {
-    return (
-      <Paper key={contentKey} p="sm">
-        <Stack gap="sm">
-          <Text size="sm" c="dimmed">
-            {t(
-              "cardDetails.lorebook.noLorebook",
-              "No lorebook attached to this card."
-            )}
-          </Text>
-          <Group>
-            <Button onClick={handleCreateNew} disabled={disabled}>
-              {t("cardDetails.lorebook.createNew", "Create New Lorebook")}
-            </Button>
-          </Group>
-        </Stack>
-      </Paper>
-    );
-  }
-
   return (
     <Stack key={contentKey} gap="sm">
-      <Accordion multiple defaultValue={[]} variant="contained">
+      <Accordion multiple defaultValue={["lorebook"]} variant="contained">
         <Accordion.Item value="lorebook">
           <Accordion.Control>
             {t("cardDetails.lorebook.controls", "Lorebook")}
@@ -231,33 +212,98 @@ export function LorebookEditor({
               onClear={clearLorebook}
               variant="panel"
             />
+
+            <Alert
+              mt="sm"
+              color="blue"
+              variant="light"
+              title={t("cardDetails.lorebook.helpTitle", "How saving works")}
+            >
+              <Spoiler
+                maxHeight={42}
+                showLabel={t("actions.show", "Show")}
+                hideLabel={t("actions.hide", "Hide")}
+              >
+                <List spacing={4} size="xs">
+                  <List.Item>
+                    {t(
+                      "cardDetails.lorebook.helpLine1",
+                      "There are two places: card file (PNG) and lorebooks database."
+                    )}
+                  </List.Item>
+                  <List.Item>
+                    {t(
+                      "cardDetails.lorebook.helpLine2",
+                      "Main “Save” (Actions) writes the lorebook into the card PNG."
+                    )}
+                  </List.Item>
+                  <List.Item>
+                    {t(
+                      "cardDetails.lorebook.helpLine3",
+                      "“Save Lorebook” (Shared mode) updates the lorebook in the database, but does not change the card PNG."
+                    )}
+                  </List.Item>
+                  <List.Item>
+                    {t(
+                      "cardDetails.lorebook.helpLine4",
+                      "To make sure export PNG contains your changes, save the card."
+                    )}
+                  </List.Item>
+                  <List.Item>
+                    {t(
+                      "cardDetails.lorebook.helpLine5",
+                      "Copy affects only this card; Shared affects the selected lorebook (which other cards may use)."
+                    )}
+                  </List.Item>
+                  <List.Item>
+                    {t(
+                      "cardDetails.lorebook.helpLine6",
+                      "Changes are not automatically applied to other cards. To update other cards, you need to save those cards (rewrite their PNG files)."
+                    )}
+                  </List.Item>
+                </List>
+              </Spoiler>
+            </Alert>
+
+            {!isLorebookAttached ? (
+              <Text size="xs" c="dimmed" mt="xs">
+                {t(
+                  "cardDetails.lorebook.noLorebook",
+                  "No lorebook attached to this card."
+                )}
+              </Text>
+            ) : null}
           </Accordion.Panel>
         </Accordion.Item>
 
-        <Accordion.Item value="settings">
-          <Accordion.Control>
-            {t("cardDetails.lorebook.settings", "Lorebook Settings")}
-          </Accordion.Control>
-          <Accordion.Panel>
-            <LorebookSettings
-              disabled={disabled}
-              data={lorebookData}
-              onChange={updateLorebookData}
-              variant="panel"
-            />
-          </Accordion.Panel>
-        </Accordion.Item>
+        {isLorebookAttached ? (
+          <Accordion.Item value="settings">
+            <Accordion.Control>
+              {t("cardDetails.lorebook.settings", "Lorebook Settings")}
+            </Accordion.Control>
+            <Accordion.Panel>
+              <LorebookSettings
+                disabled={disabled}
+                data={lorebookData}
+                onChange={updateLorebookData}
+                variant="panel"
+              />
+            </Accordion.Panel>
+          </Accordion.Item>
+        ) : null}
       </Accordion>
 
-      <LorebookEntries
-        disabled={disabled}
-        entries={lorebookData.entries}
-        onAdd={addEntry}
-        onUpdateEntry={updateEntry}
-        onDeleteEntry={deleteEntry}
-        onDuplicateEntry={duplicateEntry}
-        onMoveEntry={moveEntry}
-      />
+      {isLorebookAttached ? (
+        <LorebookEntries
+          disabled={disabled}
+          entries={lorebookData.entries}
+          onAdd={addEntry}
+          onUpdateEntry={updateEntry}
+          onDeleteEntry={deleteEntry}
+          onDuplicateEntry={duplicateEntry}
+          onMoveEntry={moveEntry}
+        />
+      ) : null}
     </Stack>
   );
 }

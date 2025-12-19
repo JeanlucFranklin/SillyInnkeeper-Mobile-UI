@@ -74,6 +74,11 @@ export function LorebookPicker({
     [items, t]
   );
 
+  const handleClear = () => {
+    onClear();
+    setQuery("");
+  };
+
   const content = (
     <Stack gap="xs">
       {variant === "standalone" ? (
@@ -102,7 +107,10 @@ export function LorebookPicker({
           onSearchChange={setQuery}
           onChange={(value) => {
             const id = (value ?? "").trim();
-            if (!id) return;
+            if (!id) {
+              handleClear();
+              return;
+            }
             pick(id);
           }}
           disabled={disabled}
@@ -178,7 +186,7 @@ export function LorebookPicker({
             variant="subtle"
             size={variant === "panel" ? "xs" : "sm"}
             color="red"
-            onClick={onClear}
+            onClick={handleClear}
             disabled={disabled}
           >
             {t("cardDetails.lorebook.clear", "Clear")}

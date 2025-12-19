@@ -233,6 +233,18 @@ const en = {
       'You have unsaved changes. Click "Save", otherwise changes will be lost when closing.',
     lorebook: {
       controls: "Lorebook",
+      helpTitle: "How saving works",
+      helpLine1:
+        "There are two places: card file (PNG) and lorebooks database.",
+      helpLine2: "Main “Save” (Actions) writes the lorebook into the card PNG.",
+      helpLine3:
+        "“Save Lorebook” (Shared mode) updates the lorebook in the database, but does not change the card PNG.",
+      helpLine4:
+        "To make sure export PNG contains your changes, save the card.",
+      helpLine5:
+        "Copy affects only this card; Shared affects the selected lorebook (which other cards may use).",
+      helpLine6:
+        "Changes are not automatically applied to other cards. To update other cards, you need to save those cards (rewrite their PNG files).",
       save: "Save Lorebook",
       saveHint:
         "Changes are saved with the card. Use the main “Save” button in Actions.",
