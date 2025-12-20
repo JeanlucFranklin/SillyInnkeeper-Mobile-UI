@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import type { MantineSize } from "@mantine/core";
 import { TextInput } from "@mantine/core";
 import { parseCommaListSmart, stringifyCommaListSmart } from "../utils/listParsing";
 
@@ -6,6 +7,7 @@ export function DeferredCommaListInput({
   label,
   placeholder,
   disabled,
+  size,
   values,
   onCommit,
   resetKey,
@@ -13,6 +15,7 @@ export function DeferredCommaListInput({
   label: string;
   placeholder?: string;
   disabled?: boolean;
+  size?: MantineSize;
   values: string[];
   onCommit: (next: string[]) => void;
   resetKey: string | number;
@@ -25,6 +28,7 @@ export function DeferredCommaListInput({
       label={label}
       placeholder={placeholder}
       disabled={disabled}
+      size={size}
       defaultValue={defaultValue}
       onBlur={(e) => onCommit(parseCommaListSmart(e.currentTarget.value))}
       onKeyDown={(e) => {

@@ -365,6 +365,18 @@ const en = {
       delayUntilRecursion: "Delay until recursion",
       ignoreBudget: "Ignore budget",
       recursionLevel: "Recursion Level",
+      entryTitleMemo: "Entry Title/Memo",
+      primaryKeywords: "Primary Keywords",
+      keywordsOrRegexes: "Keywords or Regexes",
+      keywordsOrRegexesIgnoredIfEmpty: "Keywords or Regexes (ignored if empty)",
+      triEnabled: "Enabled",
+      triDisabled: "Disabled",
+      filterToCharactersOrTags: "Filter to Characters or Tags",
+      filterToCharactersOrTagsPlaceholder:
+        "Tie this entry to specific characters or characters with specific tags",
+      exclude: "Exclude",
+      filterToGenerationTriggers: "Filter to Generation Triggers",
+      allTypesDefault: "All types (default)",
     },
   },
   creatorNotes: {

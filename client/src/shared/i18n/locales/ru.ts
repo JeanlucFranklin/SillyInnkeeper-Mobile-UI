@@ -369,6 +369,18 @@ const ru = {
       delayUntilRecursion: "Delay until recursion",
       ignoreBudget: "Ignore budget",
       recursionLevel: "Уровень рекурсии",
+      entryTitleMemo: "Заголовок/заметка (Entry Title/Memo)",
+      primaryKeywords: "Основные ключи (Primary Keywords)",
+      keywordsOrRegexes: "Ключевые слова или regex",
+      keywordsOrRegexesIgnoredIfEmpty: "Ключевые слова или regex (игнор если пусто)",
+      triEnabled: "Включено",
+      triDisabled: "Выключено",
+      filterToCharactersOrTags: "Фильтр по персонажам/тегам",
+      filterToCharactersOrTagsPlaceholder:
+        "Привязать запись к конкретным персонажам или персонажам с тегами",
+      exclude: "Исключить",
+      filterToGenerationTriggers: "Фильтр по триггерам генерации",
+      allTypesDefault: "Все типы (по умолчанию)",
     },
   },
   creatorNotes: {

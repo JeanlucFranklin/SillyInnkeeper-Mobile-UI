@@ -1,8 +1,7 @@
 import { Stack } from "@mantine/core";
 import type { LorebookEntry } from "@/shared/types/lorebooks";
 import { getStExt } from "@/shared/types/lorebooks/sillytavern";
-import { EntryAdvancedAccordion } from "./entry-editor/entry-advanced-accordion";
-import { EntryBasicFields } from "./entry-editor/entry-basic-fields";
+import { EntryStLikeFields } from "./entry-editor/entry-st-like-fields";
 
 export function LorebookEntryEditor({
   entry,
@@ -23,15 +22,7 @@ export function LorebookEntryEditor({
 
   return (
     <Stack gap="xs" mt="xs">
-      <EntryBasicFields
-        entry={entry}
-        disabled={disabled}
-        st={st}
-        resetKeyBase={resetKeyBase}
-        onUpdate={onUpdate}
-      />
-
-      <EntryAdvancedAccordion
+      <EntryStLikeFields
         entry={entry}
         disabled={disabled}
         st={st}
